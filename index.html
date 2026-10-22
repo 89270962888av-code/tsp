@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Комплект ТСП</title><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 <title>Комплект ТСП</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,6 +136,9 @@ details>summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .rule{border-left:3px solid var(--accent);padding:4px 0 4px 10px;font-size:13px}
+.ralin{display:flex;align-items:center;gap:6px}.ralin .sw{flex:none;width:18px;height:18px;margin:0}
+.wcmp td.best{color:var(--ok);font-weight:600}
+.subh{font-family:var(--f-disp);font-weight:600;font-size:16px;margin:16px 0 8px;letter-spacing:.02em}
 .rule b{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
 </style>
 
@@ -170,7 +173,7 @@ details>summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
 /* ===== Расчётное ядро: раскладка ТСП, спецификация, упаковка, загрузка машин ===== */
 const DEFAULTS = {
   panel: { maker: "МП ТСП", thickness: 100, width: 1000, lock: "Z-LOCK", core: "МВ", cls: "1", orient: "horizontal",
-           maxL: 14000, minL: 2000, gap: 10, metal: 0.5, outer: "7004", inner: "9003", band: "", bandRows: 0,
+           maxL: 14000, minL: 2000, gap: 10, metal: 0.5, outer: "7004", inner: "9003", band: "", bandRows: 0, plinth: "", plinthRows: 0, partWidth: 0, sliver: 150,
            corner: "", partColor: "9003", partThickness: 100, rigelStep: 3000, spanWarn: 6000, sealOuter: false },
   roof: { thickness: 150, width: 1000, outer: "7004", inner: "9003", overlap: 300, eave: 100 },
   weight: { steel: 7.85, glue: 0.45, dens: { "МВ": 105, "ППС": 25, "PIR": 40 }, roofExtra: 1.73 },
@@ -251,10 +254,15 @@ function supportsOf(w) {
 
 /* --- горизонтальная раскладка стены --- */
 function layoutHorizontal(w, P, flags) {
-  const W = w.kind === "part" ? P.panel.width : P.panel.width;
-  const H = w.height, rise = w.gable && w.gable.rise > 0 ? w.gable.rise : 0, Ht = H + rise, n = Math.ceil(Ht / W - 1e-9);
+  const W = w.kind === "part" ? (P.panel.partWidth || P.panel.width) : P.panel.width;
+  const H = w.height, rise = w.gable && w.gable.rise > 0 ? w.gable.rise : 0, Ht = H + rise;
+  let n = Math.ceil(Ht / W - 1e-9);
+  const lastH = H - Math.floor(H / W - 1e-9) * W;
+  if (!rise && n > 1 && lastH > 0 && lastH < (P.panel.sliver || 0)) { n--; flags.push({ lvl: "warn", wall: w.code, t: `полоса ${Math.round(lastH)} мм у верха стены панелью не закрывается — перекрыть крышкой парапета / нащельником (или изменить высоту на ${Math.round(H - lastH)} мм)` }); }
   const rows = [];
   for (let i = 0; i < n; i++) rows.push([i * W, Math.min(Ht, (i + 1) * W)]);
+  const nBelow = rows.filter((r) => r[0] < H - (P.panel.sliver || 0)).length;
+  if (!rise && lastH >= (P.panel.sliver || 0) && lastH < W && lastH < 400) flags.push({ lvl: "warn", wall: w.code, t: `верхний ряд всего ${Math.round(lastH)} мм (панель ${W} распускается) — выгоднее изменить высоту на ${Math.round(H - lastH)} или ${Math.round(H - lastH + W)} мм либо выбрать другую ширину (вкладка «Спецификация» → «Подбор ширины»)` });
   const gableClip = (y) => {
     if (!rise || y < H - 1e-6) return [w.x0, w.x1];
     const f = Math.max(0, 1 - (y - H) / rise), Lw = w.x1 - w.x0;
@@ -267,10 +275,12 @@ function layoutHorizontal(w, P, flags) {
   const pieces = [];
   rows.forEach(([y0, y1], ri) => {
     const color = w.kind === "part" ? P.panel.partColor
-      : (P.panel.band && y0 >= H - P.panel.bandRows * W - 1 && y0 < H ? P.panel.band : P.panel.outer);
+      : (P.panel.plinth && P.panel.plinthRows > 0 && y0 < P.panel.plinthRows * W - 1 ? P.panel.plinth
+        : P.panel.band && P.panel.bandRows > 0 && ri >= nBelow - P.panel.bandRows && ri < nBelow ? P.panel.band : (w.color || P.panel.outer));
     const inner = w.kind === "part" ? P.panel.partColor : P.panel.inner;
     const ops = w.openings || [];
-    const full = ops.filter((o) => o.y0 <= y0 && o.y1 >= y1);
+    const sl = P.panel.sliver || 0;
+    const full = ops.filter((o) => o.y0 <= y0 + sl && o.y1 >= y1 - sl && o.y0 < y1 && o.y1 > y0 && (o.y1 - o.y0) > sl);
     const part = ops.filter((o) => o.y0 < y1 && o.y1 > y0 && !full.includes(o));
     const [ga, gb] = gableClip(y0), gTop = gableClip(y1);
     const segsRow = subIntervals(w.x0, w.x1, full.map((o) => [o.x0, o.x1])).map(([a, b]) => [Math.max(a, Math.floor(ga / 10) * 10), Math.min(b, Math.ceil(gb / 10) * 10)]).filter(([a, b]) => b - a >= 100);
@@ -322,11 +332,17 @@ function layoutVertical(w, P, flags) {
   const strips = [];
   for (let sx = w.x0; sx < w.x1 - 1; sx += W) strips.push([sx, Math.min(w.x1, sx + W)]);
   const rig = P.panel.rigelStep;
+  const rise = w.gable && w.gable.rise > 0 ? w.gable.rise : 0, Lw = w.x1 - w.x0;
+  const riseAt = (x) => !rise ? 0 : w.gable.type === "1" ? rise * (x - w.x0) / Lw : rise * Math.max(0, 1 - Math.abs(x - (w.x0 + w.x1) / 2) / (Lw / 2));
   strips.forEach(([sx, ex], si) => {
     const ops = w.openings || [];
-    const full = ops.filter((o) => o.x0 <= sx && o.x1 >= ex);
+    const sl = P.panel.sliver || 0;
+    const full = ops.filter((o) => o.x0 <= sx + sl && o.x1 >= ex - sl && o.x0 < ex && o.x1 > sx && (o.x1 - o.x0) > sl);
     const part = ops.filter((o) => o.x0 < ex && o.x1 > sx && !full.includes(o));
-    for (const [a, b] of subIntervals(0, H, full.map((o) => [o.y0, o.y1]))) {
+    const c0 = (w.x0 + w.x1) / 2;
+    const rTop = rise ? Math.max(riseAt(sx), riseAt(ex), w.gable.type !== "1" && sx < c0 && ex > c0 ? rise : 0) : 0;
+    const Hs = H + Math.ceil(rTop / 10) * 10;
+    for (const [a, b] of subIntervals(0, Hs, full.map((o) => [o.y0, o.y1]))) {
       let ps = [[a, b]], guard = 0;
       while (ps.some(([c, d]) => d - c > P.panel.maxL) && guard++ < 20) {
         ps = ps.flatMap(([c, d]) => {
@@ -342,8 +358,9 @@ function layoutVertical(w, P, flags) {
           cuts.push({ x0: Math.max(o.x0, sx), x1: Math.min(o.x1, ex), y0: Math.max(o.y0, c), y1: Math.min(o.y1, d) });
         }
         const nsup = Math.max(2, Math.floor((d - c) / rig) + 1);
-        const color = P.panel.band && d > H - P.panel.bandRows * 1000 && w.kind !== "part" ? P.panel.band : (w.kind === "part" ? P.panel.partColor : P.panel.outer);
-        pieces.push({ wall: w.code, kind: w.kind, row: si, x0: sx, x1: ex, y0: c, y1: d, L: d - c, b: ex - sx, color,
+        const color = w.kind === "part" ? P.panel.partColor : (w.color || P.panel.outer);
+        const diag = rise > 0 && d > H + 1 && Math.abs(riseAt(sx) - riseAt(ex)) > 1;
+        pieces.push({ wall: w.code, kind: w.kind, row: si, x0: sx, x1: ex, y0: c, y1: d, L: d - c, b: ex - sx, color, diag,
                       inner: w.kind === "part" ? P.panel.partColor : P.panel.inner, cuts, nsup, supports: [], span: rig,
                       t: w.kind === "part" ? P.panel.partThickness : P.panel.thickness, W, vertical: true });
       }
@@ -384,6 +401,11 @@ function npcs(L, std, ov) { if (L <= 0) return 0; if (L <= std) return 1; return
 /* ============ главный расчёт ============ */
 function compute(project, P) {
   const flags = [];
+  const LOCKW = { "Z-LOCK": [1000, 1160, 1190], "SECRET FIX": [1000, 1095] };
+  const okW = LOCKW[P.panel.lock] || [];
+  if (okW.length && !okW.includes(Number(P.panel.width))) flags.push({ lvl: "warn", wall: "Панель", t: `ширина ${P.panel.width} мм нетипична для замка ${P.panel.lock} (обычно ${okW.join(" / ")} мм) — уточните у производителя` });
+  if (P.panel.lock === "SECRET FIX" && P.panel.orient === "vertical") flags.push({ lvl: "err", wall: "Панель", t: "панели SECRET FIX монтируются только горизонтально — выберите Z-LOCK или горизонтальную раскладку" });
+  if (P.panel.orient === "vertical" && ((P.panel.band && P.panel.bandRows > 0) || (P.panel.plinth && P.panel.plinthRows > 0))) flags.push({ lvl: "warn", wall: "Цвет", t: "при вертикальной раскладке цветные полосы по высоте не выполняются — цвет задаётся по стенам (поле «Цвет стены» в «Геометрии»)" });
   const walls = (project.walls || []).map((w) => ({ ...w, openings: (w.openings || []).map((o) => ({ ...o })) }));
   const out = { walls: [], roof: null, flags };
   for (const w of walls) {
@@ -476,8 +498,9 @@ function compute(project, P) {
   const FI = new Map();
   const fi = (code, name, color, mat, razv, sketch, L, n = 1, std = 2000, ov = 0) => {
     if (L <= 0) return;
-    if (!FI.has(code)) FI.set(code, { code, name, color, mat, razv, sketch, std, len: 0, pcs: 0 });
-    const f = FI.get(code); f.len += (L * n) / 1000; f.pcs += npcs(L, std, ov) * n;
+    const key = code + "|" + color;
+    if (!FI.has(key)) FI.set(key, { code, name, color, mat, razv, sketch, std, len: 0, pcs: 0 });
+    const f = FI.get(key); f.len += (L * n) / 1000; f.pcs += npcs(L, std, ov) * n;
   };
   const ext = out.walls.filter((w) => w.kind !== "part"), parts = out.walls.filter((w) => w.kind === "part");
   const OC = "RAL " + P.panel.outer, IC = "RAL " + P.panel.inner, BC = "RAL " + (P.panel.band || P.panel.outer);
@@ -494,29 +517,29 @@ function compute(project, P) {
     return runs;
   };
   for (const w of ext) {
+    const WC = "RAL " + (w.color || P.panel.outer), PL = "RAL " + (P.panel.plinth && P.panel.plinthRows > 0 && P.panel.orient !== "vertical" ? P.panel.plinth : (w.color || P.panel.outer));
     const holes = (w.openings || []).filter((o) => o.y0 <= 0).map((o) => [o.x0, o.x1]);
     for (const [a, b] of subIntervals(w.x0, w.x1, holes)) {
       fi("ФИУ-1", "Опорный элемент цоколя (уголок)", "оцинк.", FU, 230, "L 110×120", b - a, 1, 1250, 0);
-      fi("ФИ-1", "Отлив цокольный", OC, ST, 200, "полка 130 + капельник 50 + подгиб 20", b - a, 1, 2000, 50);
+      fi("ФИ-1", "Отлив цокольный", PL, ST, 200, "полка 130 + капельник 50 + подгиб 20", b - a, 1, 2000, 50);
     }
     if (P.panel.orient !== "vertical") {
       for (const j of jointsOf(w)) {
-        const band = P.panel.band && j.color === P.panel.band;
-        fi(band ? "ФИ-4" : "ФИ-3", "Нащельник вертикальный наружный (стык панелей)", band ? BC : OC, ST, 170, "плоский 150 + подгибы 10", j.y1 - j.y0, 1, 2000, 100);
+        fi("ФИ-3", "Нащельник вертикальный наружный (стык панелей)", "RAL " + j.color, ST, 170, "плоский 150 + подгибы 10", j.y1 - j.y0, 1, 2000, 100);
         fi("ФИ-11", "Нащельник вертикальный внутренний (стык панелей)", IC, ST, 120, "плоский 100 + подгибы 10", j.y1 - j.y0, 1, 2000, 100);
       }
     } else {
       const tiers = {};
       for (const p of w.pieces) if (p.y0 > 0 && !(w.openings || []).some((o) => Math.abs(o.y1 - p.y0) < 1)) tiers[p.y0] = (tiers[p.y0] || 0) + (p.x1 - p.x0);
-      for (const y of Object.keys(tiers)) fi("ФИ-3Г", "Нащельник горизонтальный (стык ярусов, шов 20 мм)", OC, ST, 200, "Z-профиль 20/150 + подгибы", tiers[y], 1, 2000, 50);
+      for (const y of Object.keys(tiers)) fi("ФИ-3Г", "Нащельник горизонтальный (стык ярусов, шов 20 мм)", WC, ST, 200, "Z-профиль 20/150 + подгибы", tiers[y], 1, 2000, 50);
     }
     for (const o of w.openings || []) {
       const ow = o.x1 - o.x0, oh = o.y1 - o.y0;
-      fi("ФИ-5", "Откос проёма наружный", OC, ST, 210, "Г 130×60 + подгибы", oh, 2, 2000, 100);
-      fi("ФИ-6", "Нащельник (козырёк) над проёмом", OC, ST, 220, "полка 130 + капельник 60", ow, 1, 2000, 50);
+      fi("ФИ-5", "Откос проёма наружный", WC, ST, 210, "Г 130×60 + подгибы", oh, 2, 2000, 100);
+      fi("ФИ-6", "Нащельник (козырёк) над проёмом", WC, ST, 220, "полка 130 + капельник 60", ow, 1, 2000, 50);
       fi("ФИ-12", "Обрамление проёма внутреннее", IC, ST, 160, "Г 100×50 + подгиб", oh, 2, 2000, 100);
       fi("ФИ-12", "Обрамление проёма внутреннее", IC, ST, 160, "Г 100×50 + подгиб", ow, isWin(o.type) ? 2 : 1, 2000, 50);
-      if (isWin(o.type)) fi("ФИ-7", "Отлив оконный", OC, ST, 230, "полка 160 + капельник 50", ow, 1, 2000, 50);
+      if (isWin(o.type)) fi("ФИ-7", "Отлив оконный", WC, ST, 230, "полка 160 + капельник 50", ow, 1, 2000, 50);
       if (isDoor(o.type)) { fi("ФИУ-2", "Обрамление ворот/дверей (П-профиль)", "оцинк.", FU, 200, "П 50×100×50", oh, 2, 1250, 0); fi("ФИУ-2", "Обрамление ворот/дверей (П-профиль)", "оцинк.", FU, 200, "П 50×100×50", ow, 1, 1250, 0); }
     }
     const Lw = w.x1 - w.x0;
@@ -545,7 +568,13 @@ function compute(project, P) {
     fi("ФИ-К2", "Карнизная планка (капельник)", RC, ST, 200, "Г 80×100 + капельник", R.length, ns, 2000, 50);
     if (ns === 2) { fi("ФИ-К3", "Конёк наружный", RC, ST, 500, "2×200 + подгибы, угол по уклону", R.length, 1, 2000, 100); fi("ФИ-К4", "Конёк внутренний", RI, ST, 300, "2×120 + подгибы", R.length, 1, 2000, 100); }
   }
-  const fiList = [...FI.values()].map((f) => ({ ...f, len: Math.round(f.len * 10) / 10, pcsRes: Math.ceil(f.pcs * (1 + P.fix.reserve / 100)) }));
+  const codeCount = {}; for (const f of FI.values()) codeCount[f.code] = (codeCount[f.code] || 0) + 1;
+  const codeIdx = {}, LET = "абвгдежзик";
+  const fiList = [...FI.values()].map((f) => {
+    let code = f.code;
+    if (codeCount[f.code] > 1) { codeIdx[f.code] = (codeIdx[f.code] || 0); code = f.code + LET[codeIdx[f.code]++ % LET.length]; }
+    return { ...f, code, base: f.code, len: Math.round(f.len * 10) / 10, pcsRes: Math.ceil(f.pcs * (1 + P.fix.reserve / 100)) };
+  });
 
   /* ===== крепёж ===== */
   const FX = new Map();
@@ -566,9 +595,9 @@ function compute(project, P) {
   }
   const lineFix = (Lm, step, lines, members) => Math.ceil((Lm * 1000) / step) * lines + members * lines;
   for (const f of fiList) {
-    if (f.code === "ФИУ-1") fx("an", "Шуруп с дюбелем (бетон)", "8×80", "Опорный уголок к цоколю", `шаг ${P.fix.anchorStep} мм`, lineFix(f.len, P.fix.anchorStep, 1, f.pcs), 50, 0.03);
-    else if (f.code === "ФИУ-2") fx("s55", "Саморез с EPDM", "5,5×32", "ФИУ / уголки к металлокаркасу", `шаг ${P.fix.fiStep} мм`, lineFix(f.len, P.fix.fiStep, 1, f.pcs), 250, 0.006);
-    else if (f.code === "ФИ-13") {
+    if (f.base === "ФИУ-1") fx("an", "Шуруп с дюбелем (бетон)", "8×80", "Опорный уголок к цоколю", `шаг ${P.fix.anchorStep} мм`, lineFix(f.len, P.fix.anchorStep, 1, f.pcs), 50, 0.03);
+    else if (f.base === "ФИУ-2") fx("s55", "Саморез с EPDM", "5,5×32", "ФИУ / уголки к металлокаркасу", `шаг ${P.fix.fiStep} мм`, lineFix(f.len, P.fix.fiStep, 1, f.pcs), 250, 0.006);
+    else if (f.base === "ФИ-13") {
       fx("s42", "Саморез с прессшайбой оцинк.", "4,2×16", "Внутренние ФИ к панелям", `шаг ${P.fix.fiStep} мм`, lineFix(f.len, P.fix.fiStep, 1, f.pcs), 1000, 0.002);
       fx("dw", "Дюбель-гвоздь", "6×40", "Уголок перегородки к полу", "шаг 500 мм", lineFix(f.len / 2, 500, 1, Math.ceil(f.pcs / 2)), 100, 0.006);
       fx("s55", "Саморез с EPDM", "5,5×32", "ФИУ / уголки к металлокаркасу", `шаг ${P.fix.fiStep} мм`, lineFix(f.len / 2, 500, 1, Math.ceil(f.pcs / 2)), 250, 0.006);
@@ -687,7 +716,24 @@ function compute(project, P) {
 
   /* сводка */
   const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
-  const net = sum(out.walls, (w) => ((w.x1 - w.x0) * (w.height + (w.gable && w.gable.rise > 0 ? w.gable.rise / 2 : 0)) - sum(w.openings || [], (o) => Math.max(0, Math.min(o.x1, w.x1) - Math.max(o.x0, w.x0)) * Math.max(0, Math.min(o.y1, w.height) - Math.max(o.y0, 0)))) / 1e6)
+  const covered = (w, p) => {
+    let a = (p.x1 - p.x0) * (p.y1 - p.y0) - sum(p.cuts, (c) => (c.x1 - c.x0) * (c.y1 - c.y0));
+    const rise = w.gable && w.gable.rise > 0 ? w.gable.rise : 0;
+    if (rise && p.y1 > w.height) {
+      const N = 20, Lw = w.x1 - w.x0; let lost = 0;
+      for (let i = 0; i < N; i++) {
+        const y = p.y0 + (p.y1 - p.y0) * (i + 0.5) / N;
+        if (y <= w.height) continue;
+        const f = Math.max(0, 1 - (y - w.height) / rise);
+        const [ga, gb] = w.gable.type === "1" ? [w.x1 - Lw * f, w.x1] : [(w.x0 + w.x1) / 2 - Lw / 2 * f, (w.x0 + w.x1) / 2 + Lw / 2 * f];
+        const inside = Math.max(0, Math.min(p.x1, gb) - Math.max(p.x0, ga));
+        lost += ((p.x1 - p.x0) - inside) * (p.y1 - p.y0) / N;
+      }
+      a -= lost;
+    }
+    return a;
+  };
+  const net = sum(out.walls, (w) => sum(w.pieces, (p) => covered(w, p)) / 1e6)
     + (out.roof ? ((out.roof.slopes || 1) * out.roof.S * out.roof.length) / 1e6 : 0);
   const totals = {
     pieces: allPieces.length, marks: marks.size, positions: orderList.length,
@@ -774,7 +820,20 @@ function buildQuick(q0, P) {
   return { walls: [A, Bw, E1, E2], roof, corners: 4, notes };
 }
 
-if (typeof module !== "undefined") module.exports = { compute, DEFAULTS, clone, buildQuick, QUICK_DEFAULTS };
+/* ===== Подбор ширины: расчёт по всем типовым ширинам замка ===== */
+function compareWidths(project, P0) {
+  const LOCKW = { "Z-LOCK": [1000, 1160, 1190], "SECRET FIX": [1000, 1095] };
+  const ws = LOCKW[P0.panel.lock] || [1000, 1095, 1160, 1190];
+  return ws.map((W) => {
+    const P = clone(P0); P.panel.width = W;
+    try {
+      const r = compute(project, P), t = r.totals;
+      return { W, pcs: t.orderPcs, area: t.orderArea, waste: t.waste, wastePct: t.orderArea ? (t.waste / t.orderArea) * 100 : 0, marks: t.marks, packs: t.packs, trucks: t.trucks, kg: t.shipKg, screws: r.fx.filter((x) => /сэндвич/.test(x.name)).reduce((s, x) => s + x.qtyRes, 0) };
+    } catch (e) { return { W, err: true }; }
+  });
+}
+
+if (typeof module !== "undefined") module.exports = { compute, DEFAULTS, clone, buildQuick, QUICK_DEFAULTS, compareWidths };
 
 </script>
 <script>
@@ -787,6 +846,11 @@ const EXAMPLE = {
   notes: ["Пример: геометрия снята с АР/КР 03-06-26, перегородки — по планам КР (±100 мм)."],
 };
 const RAL = {"1013":"#E3D9C6","1014":"#DDC49A","1015":"#E6D2B5","1018":"#F8F32B","2004":"#E25303","3003":"#9B111E","3005":"#5E2129","3009":"#6D342D","3011":"#792423","3020":"#BB1E10","3028":"#CC2C24","5002":"#20214F","5005":"#1E3B8C","5010":"#0E294B","5015":"#2271B3","5021":"#07737A","6002":"#2D572C","6005":"#0F4336","6018":"#57A639","6029":"#20603D","7004":"#9B9B9B","7005":"#6C6E6B","7016":"#383E42","7024":"#474A50","7026":"#2F3A3F","7035":"#CBD0CC","7047":"#D0D0D0","8004":"#8E402A","8017":"#45322E","9002":"#E7EBDA","9003":"#F4F4F4","9005":"#0A0A0A","9006":"#A5A5A5","9010":"#F7F9EF"};
+const RAL_NAMES = {"1014":"слоновая кость","1015":"светлая слоновая кость","2004":"оранжевый","3003":"рубиново-красный","3005":"винно-красный","3009":"оксидно-красный","3011":"коричнево-красный","3020":"транспортный красный","5002":"ультрамарин","5005":"сигнальный синий","5015":"небесно-синий","5021":"водная синь","6002":"лиственно-зелёный","6005":"зелёный мох","6018":"жёлто-зелёный","7004":"сигнальный серый","7016":"антрацит","7024":"графит","7035":"светло-серый","8017":"шоколад","9002":"серо-белый","9003":"сигнальный белый","9005":"чёрный","9006":"бело-алюминиевый","9010":"белый"};
+const LOCK_W = { "Z-LOCK": [1000, 1160, 1190], "SECRET FIX": [1000, 1095] };
+const THICK = [50, 60, 80, 100, 120, 150, 170, 180, 200, 250, 300];
+const ralList = () => `<datalist id="ralList">${Object.entries(RAL_NAMES).map(([k, v]) => `<option value="${k}">${k} — ${v}</option>`).join("")}</datalist>`;
+const ralInput = (attr, val, ph) => `<span class="ralin"><span class="sw" style="background:${val ? ralHex(val) : "transparent"}"></span><input type="text" list="ralList" ${attr} value="${esc(val || "")}" placeholder="${ph || "RAL"}" inputmode="numeric"></span>`;
 const ralHex = (c) => RAL[String(c).replace(/\D/g, "")] || "#B7BCC1";
 const lum = (hex) => { const n = parseInt(hex.slice(1), 16); const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -844,6 +908,12 @@ function renderTabs() {
     `<button type="button" role="tab" data-tab="${t[0]}" aria-selected="${S.tab === t[0]}">${t[1] ? `<span class="n">${t[1]}</span>` : ""}${t[2]}${t[0] === "flags" && R && R.flags.length ? ` <span class="chip warn">${R.flags.length}</span>` : ""}</button>`).join("");
 }
 function renderTab() {
+  if (S.rendering) return;
+  S.rendering = true;
+  try { const ae = document.activeElement; if (ae && $("#main").contains(ae) && ae.blur) ae.blur(); renderTabInner(); }
+  finally { S.rendering = false; }
+}
+function renderTabInner() {
   renderTabs();
   const m = $("#main");
   const f = { project: tabProject, geo: tabGeo, rules: tabRules, layout: tabLayout, spec: tabSpec, packs: tabPacks, trucks: tabTrucks, flags: tabFlags }[S.tab];
@@ -851,6 +921,7 @@ function renderTab() {
   if (S.tab === "project") bindProject();
   if (S.tab === "geo") bindGeo();
   if (S.tab === "rules") bindRules();
+  if (S.tab === "spec") bindWidthCmp();
 }
 $("#tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (!b) return; S.tab = b.dataset.tab; try { location.hash = S.tab; } catch (er) {} renderTab(); });
 
@@ -863,6 +934,32 @@ const QF = [
   ["winN", "Окон на фасад, шт.", "num"], ["winW", "Ширина окна, мм", "num"], ["winH", "Высота окна, мм", "num"], ["winSill", "Низ окна от низа панелей, мм", "num"], ["winWall", "Окна на фасадах", "wall"],
   ["roof", "Кровля", "roof"], ["roofDeg", "Уклон кровли, °", "num"], ["purlin", "Шаг прогонов, мм", "num"],
 ];
+function panelColorForm() {
+  const p = P.panel, ws = LOCK_W[p.lock] || [1000, 1095, 1160, 1190];
+  return `${ralList()}<div class="form">
+    <label>Толщина стен, мм<select data-pp="panel.thickness">${THICK.map((t) => `<option ${+p.thickness === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+    <label>Замок<select data-pp="panel.lock">${Object.keys(LOCK_W).map((l) => `<option ${p.lock === l ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+    <label>Рабочая ширина, мм<select data-pp="panel.width">${[...new Set([...ws, +p.width])].sort((a, b) => a - b).map((w) => `<option ${+p.width === w ? "selected" : ""}>${w}</option>`).join("")}</select></label>
+    <label>Раскладка<select data-pp="panel.orient"><option value="horizontal" ${p.orient !== "vertical" ? "selected" : ""}>горизонтальная</option><option value="vertical" ${p.orient === "vertical" ? "selected" : ""} ${p.lock === "SECRET FIX" ? "disabled" : ""}>вертикальная</option></select></label>
+    <label>Основной цвет снаружи${ralInput('data-pp="panel.outer"', p.outer)}</label>
+    <label>Цвет внутри${ralInput('data-pp="panel.inner"', p.inner)}</label>
+    <label>Нижняя полоса: цвет${ralInput('data-pp="panel.plinth"', p.plinth, "нет")}</label>
+    <label>Нижняя полоса: рядов<input type="number" min="0" data-pp="panel.plinthRows" value="${p.plinthRows || 0}"></label>
+    <label>Верхняя полоса: цвет${ralInput('data-pp="panel.band"', p.band, "нет")}</label>
+    <label>Верхняя полоса: рядов<input type="number" min="0" data-pp="panel.bandRows" value="${p.bandRows || 0}"></label>
+    <label>Углы снаружи${ralInput('data-pp="panel.corner"', p.corner, "как полоса")}</label>
+  </div>
+  <p class="hint" style="margin-top:6px">Здание в 2–3 цветах: нижняя полоса (цоколь), основное поле, верхняя полоса. Отдельный фасад другим цветом — поле «Цвет стены» на вкладке «Геометрия». Пустой цвет — полосы нет.</p>`;
+}
+function bindPanelColor(root) {
+  root.querySelectorAll("[data-pp]").forEach((el) => (el.onchange = () => {
+    const path = el.dataset.pp, cur = getP(path);
+    let v = el.type === "number" || typeof cur === "number" ? num(el.value) : el.value.trim().replace(/^RAL\s*/i, "");
+    setP(path, v);
+    if (path === "panel.lock") { const ws = LOCK_W[v]; if (ws && !ws.includes(+P.panel.width)) P.panel.width = ws[0]; if (v === "SECRET FIX") P.panel.orient = "horizontal"; }
+    recalc(true); const sc = window.scrollY; renderTab(); window.scrollTo(0, sc);
+  }));
+}
 function quickCard() {
   const q = { ...QUICK_DEFAULTS, ...(PRJ.quick || {}) };
   const walls = [["А", "А (длинный)"], ["Б", "Б (длинный)"], ["А+Б", "А и Б"], ["торцы", "оба торца"], ["1", "торец 1"]];
@@ -874,6 +971,8 @@ function quickCard() {
       if (t === "roof") return `<label>${l}<select data-q="${k}">${[["none", "не из ТСП (парапет)"], ["2", "ТСП, двускатная"], ["1", "ТСП, односкатная"]].map(([v, n]) => `<option value="${v}" ${q[k] === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>`;
       return `<label>${l}<input type="number" step="any" data-q="${k}" value="${q[k]}"></label>`;
     }).join("")}</div>
+    <div class="subh">Панель и цвета</div>
+    ${panelColorForm()}
     <div class="row" style="margin-top:14px"><button type="button" class="primary" id="btnQuick">Построить и рассчитать</button><span class="hint">Заменит текущие стены и кровлю. Тип панели, цвета и машина — на вкладке «Нормы».</span></div>
   </div>`;
 }
@@ -1071,6 +1170,7 @@ function bindProject() {
     drop.ondragleave = () => drop.classList.remove("over");
     drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); addFiles([...e.dataTransfer.files]); };
   }
+  bindPanelColor($("#main"));
   $("#main").querySelectorAll("[data-q]").forEach((el) => (el.onchange = () => {
     PRJ.quick = { ...QUICK_DEFAULTS, ...(PRJ.quick || {}) };
     PRJ.quick[el.dataset.q] = el.type === "number" ? num(el.value) : el.value; persist();
@@ -1135,6 +1235,7 @@ function tabGeo() {
         <label class="wide">Колонны, x через запятую<input type="text" data-f="columns" value="${w.columns.join(", ")}"></label>
         <label class="wide">Стойки фахверка / обрамления, x<input type="text" data-f="posts" value="${w.posts.join(", ")}"></label>
         <label class="wide">Оси (x:имя)<input type="text" data-f="axes" value="${w.axes.map((a) => a.x + ":" + a.name).join(", ")}"></label>
+        <label>Цвет стены, RAL (пусто — основной)${ralInput('data-f="color"', w.color, P.panel.outer)}${ralList()}</label>
         <label>Фронтон: подъём, мм<input type="number" data-f="gRise" value="${w.gable ? w.gable.rise : 0}"></label>
         <label>Фронтон: форма<select data-f="gType"><option value="2" ${!w.gable || w.gable.type !== "1" ? "selected" : ""}>двускатный</option><option value="1" ${w.gable && w.gable.type === "1" ? "selected" : ""}>односкатный</option></select></label>
       </div>
@@ -1167,6 +1268,7 @@ function bindGeo() {
     if (f === "columns" || f === "posts") w[f] = nums(el.value);
     else if (f === "axes") w.axes = el.value.split(/[;,]+/).map((s) => s.trim()).filter(Boolean).map((s) => { const [x, n] = s.split(":"); return { x: num(x), name: (n || "").trim() }; });
     else if (["base", "x0", "x1", "height"].includes(f)) w[f] = num(el.value);
+    else if (f === "color") { const v = el.value.trim().replace(/^RAL\s*/i, ""); if (v) w.color = v; else delete w.color; const sw = el.parentNode.querySelector(".sw"); if (sw) sw.style.background = v ? ralHex(v) : "transparent"; }
     else if (f === "gRise") { const r = num(el.value); w.gable = r > 0 ? { rise: r, type: (w.gable && w.gable.type) || "2" } : undefined; }
     else if (f === "gType") { if (w.gable) w.gable.type = el.value; }
     else w[f] = el.value;
@@ -1197,9 +1299,10 @@ const RULES = [
     ["panel.lock", "Замок", "sel", ["Z-LOCK", "SECRET FIX"]], ["panel.core", "Утеплитель", "sel", ["МВ", "ППС", "PIR"]], ["panel.cls", "Класс ГОСТ 32603", "sel", ["1", "2"]],
     ["panel.orient", "Раскладка стен", "sel", [["horizontal", "горизонтальная"], ["vertical", "вертикальная (Z-LOCK)"]]],
     ["panel.metal", "Толщина металла, мм", "num"], ["panel.outer", "Цвет снаружи, RAL", "text"], ["panel.inner", "Цвет внутри, RAL", "text"],
-    ["panel.band", "Цвет верхней полосы, RAL (пусто — нет)", "text"], ["panel.bandRows", "Рядов в полосе", "num"], ["panel.corner", "Цвет наружных углов, RAL", "text"],
-    ["panel.partThickness", "Толщина перегородок, мм", "num"], ["panel.partColor", "Цвет перегородок, RAL", "text"],
-    ["panel.maxL", "Макс. длина панели, мм", "num"], ["panel.minL", "Мин. заводская длина, мм", "num"], ["panel.gap", "Зазор в стыке на опоре, мм", "num"],
+    ["panel.band", "Цвет верхней полосы, RAL (пусто — нет)", "text"], ["panel.bandRows", "Рядов в верхней полосе", "num"],
+    ["panel.plinth", "Цвет нижней полосы, RAL (пусто — нет)", "text"], ["panel.plinthRows", "Рядов в нижней полосе", "num"], ["panel.corner", "Цвет наружных углов, RAL", "text"],
+    ["panel.partThickness", "Толщина перегородок, мм", "num"], ["panel.partWidth", "Ширина панелей перегородок, мм (0 — как стены)", "num"], ["panel.partColor", "Цвет перегородок, RAL", "text"],
+    ["panel.maxL", "Макс. длина панели, мм", "num"], ["panel.sliver", "Не резать полоски уже, мм", "num"], ["panel.minL", "Мин. заводская длина, мм", "num"], ["panel.gap", "Зазор в стыке на опоре, мм", "num"],
     ["panel.rigelStep", "Шаг ригелей (верт. раскладка), мм", "num"], ["panel.spanWarn", "Предупреждать при пролёте >, мм", "num"], ["panel.sealOuter", "Герметизировать наружный замок", "chk"],
   ]],
   ["Кровельные панели", [["roof.thickness", "Толщина, мм", "num"], ["roof.width", "Рабочая ширина, мм", "num"], ["roof.outer", "Цвет снаружи, RAL", "text"], ["roof.inner", "Цвет внутри, RAL", "text"], ["roof.overlap", "Нахлёст по длине, мм", "num"], ["roof.eave", "Свес у карниза, мм", "num"]]],
@@ -1221,6 +1324,7 @@ function tabRules() {
       <div class="rule"><b>Пачка</b>Высота ≤ ${fmt(P.pack.maxH)} мм с пенопластом, масса ≤ ${fmt(P.pack.maxKg)} кг, длинные снизу. Стены ${P.panel.thickness} мм — до ${nPack(P.panel.thickness)} шт. в пачке.</div>
       <div class="rule"><b>Машина</b>${esc(P.truck.name)}: ${fmt(P.truck.L)}×${fmt(P.truck.W)} мм, ${fmt(P.truck.payload / 1000, 1)} т; пачки в ${Math.floor(P.truck.W / (P.panel.width + P.pack.extraW))} ряда по ширине, до ${P.truck.tiers} ярусов и ${fmt(P.truck.H)} мм по высоте; короткая пачка — только на более длинную.</div>
     </div>
+    ${widthCmpHTML()}
     <p class="hint" style="margin-top:10px">Источники: каталог «Металл Профиль» (Ver6, 2025) — длины саморезов, масса, нахлёсты, уклоны; инструкции DoorHan и заводов ТСП — пакет ≤ 1260 мм, ≤ 3,5 т, 2 пачки по ширине, до 3 ярусов (2,4 м). Изменения сохраняются в этом браузере.</p>
   </div>
   ${RULES.map(([title, fields]) => `<div class="card"><h3>${title}</h3><div class="form">${fields.map(([path, label, type, opts]) => {
@@ -1240,6 +1344,7 @@ function bindRules() {
     const v = el.type === "checkbox" ? el.checked : typeof cur === "number" ? num(el.value) : el.value.trim();
     setP(path, v); recalc(true); const sc = window.scrollY; renderTab(); window.scrollTo(0, sc);
   }));
+  bindWidthCmp();
   $("#rulesReset").onclick = () => { P = clone(DEFAULTS); recalc(); toast("Нормы сброшены"); };
 }
 
@@ -1341,7 +1446,8 @@ function marksTable(code) {
 }
 function tabLayout() {
   if (!R || (!R.walls.length && !R.roof)) return `<div class="card empty">Нет геометрии. Загрузите проект или откройте пример.</div>`;
-  return R.walls.map((w) => `
+  const cols = R.totals.byColor;
+  return `<div class="card"><div class="row small" style="gap:14px"><b>Цвета:</b>${cols.map((c) => `<span><span class="sw" style="background:${ralHex(c.color)}"></span>RAL ${c.color}${RAL_NAMES[c.color] ? " " + RAL_NAMES[c.color] : ""} / ${c.inner} — <span class="mono">${fmt(c.area, 1)} м²</span>, ${c.n} шт.</span>`).join("")}</div></div>` + R.walls.map((w) => `
     <div class="card">
       <div class="ptitle"><h2 style="margin:0">${esc(w.code)} — ${esc(w.title)}</h2><span class="muted small mono">${fmt(w.x1 - w.x0)} × ${fmt(w.height)} мм · ${w.pieces.length} панелей · ${new Set(w.pieces.map((p) => p.mark)).size} марок</span></div>
       <div class="svgbox" style="margin-top:10px">${wallSVG(w)}</div>
@@ -1349,11 +1455,26 @@ function tabLayout() {
     </div>`).join("") + (R.roof ? `<div class="card"><h2>Кровля</h2><div class="svgbox">${roofSVG(R.roof)}</div><details><summary>Марки кровельных панелей</summary><div style="margin-top:8px">${marksTable("К")}</div></details></div>` : "") + `<div class="card">${legendHTML()}</div>`;
 }
 
+/* =================== ПОДБОР ШИРИНЫ =================== */
+function widthCmpHTML() {
+  if (!PRJ.walls.length) return "";
+  const rows = compareWidths(PRJ, P).filter((x) => !x.err);
+  if (rows.length < 2) return "";
+  const best = (k) => Math.min(...rows.map((x) => x[k]));
+  const c = (x, k, d = 0, suf = "") => `<td class="n ${x[k] === best(k) ? "best" : ""}">${fmt(x[k], d)}${suf}</td>`;
+  return `<div class="subh">Подбор ширины панели (${esc(P.panel.lock)}, ${P.panel.thickness} мм)</div>
+  <div class="tbl-wrap wcmp"><table><thead><tr><th class="n">Ширина</th><th class="n">Панелей, шт.</th><th class="n">Заказ, м²</th><th class="n">Отход</th><th class="n">Марок</th><th class="n">Пачек</th><th class="n">Машин</th><th class="n">Саморезов</th><th></th></tr></thead><tbody>
+  ${rows.map((x) => `<tr><td class="n"><b>${x.W}</b></td>${c(x, "pcs")}${c(x, "area", 1)}${c(x, "wastePct", 1, " %")}${c(x, "marks")}${c(x, "packs")}${c(x, "trucks")}${c(x, "screws")}<td>${+P.panel.width === x.W ? `<span class="chip ext">выбрана</span>` : `<button type="button" class="small" data-setw="${x.W}">Выбрать</button>`}</td></tr>`).join("")}
+  </tbody></table></div><p class="hint">Зелёным — лучшее значение в столбце. Меньше отход — меньше переплата за металл; меньше панелей и марок — быстрее монтаж.</p>`;
+}
+function bindWidthCmp() { $("#main").querySelectorAll("[data-setw]").forEach((b) => (b.onclick = () => { P.panel.width = +b.dataset.setw; recalc(); toast("Ширина панели: " + b.dataset.setw + " мм"); })); }
+
 /* =================== СПЕЦИФИКАЦИЯ =================== */
 function tabSpec() {
   if (!R || !R.order.length) return `<div class="card empty">Нет данных</div>`;
   const t = R.totals;
   return `
+  <div class="card">${widthCmpHTML()}</div>
   <div class="card">
     <h2>Панели к заказу</h2>
     <div class="row small" style="margin-bottom:10px;gap:14px">${t.byColor.map((c) => `<span><span class="sw" style="background:${ralHex(c.color)}"></span>${c.kind === "roof" ? "кровля" : "стены"} ${c.color}/${c.inner}: <b class="mono">${fmt(c.area, 1)} м²</b>, ${c.n} шт.</span>`).join("")}</div>
