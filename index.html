@@ -1,0 +1,1528 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Комплект ТСП</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: инженерный рабочий стол — тёмная шапка-«паспорт», полоса итогов, вкладки по шагам: проект → геометрия → нормы → результат */
+:root{
+  --bg:#ECEEF0; --surface:#FFFFFF; --sunk:#F5F6F7; --ink:#1C2126; --muted:#5B646E; --line:#CDD2D7; --line2:#E2E5E8;
+  --head:#22282E; --head-ink:#F1F3F5; --head-muted:#A8B0B8;
+  --accent:#D4500F; --accent-ink:#FFFFFF; --accent-soft:#FBE6DA;
+  --ok:#2E7A4E; --warn:#A86A12; --err:#B3261E; --warn-soft:#FDF1DC; --err-soft:#FBE3E1; --info-soft:#E3ECF5;
+  --open:#2B5C9E; --post-need:#E07B00; --col:#26508F;
+  --f-disp:"Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --f-mono:"IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14171A; --surface:#1C2024; --sunk:#171A1D; --ink:#E6E9EC; --muted:#9AA3AC; --line:#353B41; --line2:#2A2F34;
+  --head:#0E1012; --head-ink:#F1F3F5; --head-muted:#8E979F;
+  --accent:#F06A28; --accent-ink:#1A0F08; --accent-soft:#3A2416;
+  --ok:#5CC08A; --warn:#E3A84A; --err:#F2847A; --warn-soft:#33281A; --err-soft:#3A1F1D; --info-soft:#1D2733;
+  --open:#7FA8E0; --post-need:#F5A04A; --col:#8DB0E6; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#14171A; --surface:#1C2024; --sunk:#171A1D; --ink:#E6E9EC; --muted:#9AA3AC; --line:#353B41; --line2:#2A2F34;
+  --head:#0E1012; --head-ink:#F1F3F5; --head-muted:#8E979F;
+  --accent:#F06A28; --accent-ink:#1A0F08; --accent-soft:#3A2416;
+  --ok:#5CC08A; --warn:#E3A84A; --err:#F2847A; --warn-soft:#33281A; --err-soft:#3A1F1D; --info-soft:#1D2733;
+  --open:#7FA8E0; --post-need:#F5A04A; --col:#8DB0E6; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--head)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1480px;margin:0 auto}
+header.top{background:var(--head);color:var(--head-ink)}
+header.top .wrap{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-disp);font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase}
+.brand span{color:var(--head-muted);font-size:12px;display:block;margin-top:-3px}
+.proj{flex:1 1 260px;min-width:0;display:flex;gap:8px;align-items:center}
+.proj input{flex:1;min-width:0;background:transparent;border:1px solid #3B444D;color:var(--head-ink);border-radius:4px;padding:6px 9px;font:inherit}
+.proj input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+button,.btn{font:500 13px var(--f-body);border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+button:hover{border-color:var(--muted)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.ghost{background:transparent;border-color:#3B444D;color:var(--head-ink)}
+button.ghost:hover{border-color:var(--head-muted)}
+button.small{padding:4px 8px;font-size:12px}
+button.danger{color:var(--err)}
+button:disabled{opacity:.5;cursor:default}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:16px}
+.kpi{background:var(--surface);padding:10px 14px;min-width:0}
+.kpi .l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--f-disp);font-weight:600;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kpi.hot .v{color:var(--accent)}
+.kpi.bad .v{color:var(--warn)}
+nav.tabs{display:flex;gap:2px;margin-top:16px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+nav.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:9px 12px;color:var(--muted);font-weight:500}
+nav.tabs button .n{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-right:2px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs .sep{width:1px;background:var(--line);margin:8px 6px}
+main{padding-block:16px 48px}
+section.tab{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+.card h2,.card h3{font-family:var(--f-disp);font-weight:600;letter-spacing:.02em;margin:0 0 10px;text-wrap:balance}
+.card h2{font-size:21px}.card h3{font-size:17px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.grid-geo{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.grid2,.grid-geo{grid-template-columns:minmax(0,1fr)}}
+.drop{border:2px dashed var(--line);border-radius:8px;padding:22px;text-align:center;background:var(--sunk);transition:border-color .15s}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop b{font-family:var(--f-disp);font-size:20px;font-weight:600;letter-spacing:.02em}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+.thumb{border:1px solid var(--line);border-radius:5px;padding:6px;background:var(--surface);cursor:pointer;position:relative;min-width:0}
+.thumb img{display:block;width:100%;height:110px;object-fit:contain;background:#fff;border-radius:3px}
+.thumb .cap{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb input{position:absolute;top:10px;left:10px;width:18px;height:18px;accent-color:var(--accent)}
+.thumb.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.status{border-radius:5px;padding:10px 12px;background:var(--info-soft);font-size:13px;white-space:pre-wrap}
+.status.err{background:var(--err-soft)}
+.status.ok{background:color-mix(in srgb,var(--ok) 14%,var(--surface))}
+.steps{margin:0;padding-left:20px;display:grid;gap:4px}
+.wlist{display:grid;gap:6px}
+.witem{border:1px solid var(--line);border-radius:5px;padding:8px 10px;cursor:pointer;background:var(--surface);display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;align-items:center;text-align:left;width:100%;font:inherit;color:inherit}
+.witem[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.witem .code{font-family:var(--f-disp);font-size:20px;font-weight:700;min-width:34px;text-align:center;grid-row:span 2}
+.witem .t{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.witem .d{font-size:12px;color:var(--muted)}
+.chip{display:inline-block;font-size:11px;border-radius:999px;padding:1px 8px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.ext{border-color:var(--col);color:var(--col)}
+.chip.part{border-color:var(--muted)}
+.chip.warn{border-color:var(--warn);color:var(--warn)}
+.chip.err{border-color:var(--err);color:var(--err)}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 12px}
+.form label,.field{display:grid;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.form .wide{grid-column:span 2}
+@media (max-width:520px){.form .wide{grid-column:auto}}
+input[type=text],input[type=number],select,textarea{font:13px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:6px 8px;width:100%;min-width:0}
+input[type=number]{font-family:var(--f-mono)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:5px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+th{background:var(--sunk);font-weight:600;font-size:12px;color:var(--muted);white-space:nowrap;position:sticky;top:0}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tfoot td{font-weight:600;background:var(--sunk)}
+td input,td select{padding:4px 6px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,.25);vertical-align:-1px;margin-right:4px}
+.svgbox{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--sunk);padding:8px}
+.svgbox svg{display:block;min-width:720px;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
+.flag{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;padding:8px 10px;border-radius:5px;background:var(--warn-soft);align-items:start}
+.flag.err{background:var(--err-soft)}
+.flag .w{font-family:var(--f-disp);font-weight:700;font-size:16px;min-width:28px}
+.truck{display:grid;gap:8px}
+.truck-head{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline}
+.truck-head b{font-family:var(--f-disp);font-size:22px;font-weight:700}
+.bar{height:6px;background:var(--line2);border-radius:3px;overflow:hidden;width:140px;display:inline-block;vertical-align:middle;margin-left:6px}
+.bar span{display:block;height:100%;background:var(--accent)}
+.bar.over span{background:var(--err)}
+.ptitle{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;justify-content:space-between}
+details>summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
+.hint{font-size:12px;color:var(--muted)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--head);color:var(--head-ink);padding:10px 14px;border-radius:6px;font-size:13px;z-index:20;max-width:calc(100vw - 32px)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.rule{border-left:3px solid var(--accent);padding:4px 0 4px 10px;font-size:13px}
+.rule b{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="6" width="30" height="7" fill="#F06A28"/><rect x="2" y="14" width="30" height="7" fill="#9AA1A8"/><rect x="2" y="22" width="30" height="7" fill="#9AA1A8"/><rect x="2" y="6" width="30" height="23" fill="none" stroke="#F1F3F5" stroke-width="1.5"/></svg>
+      <div><b>Комплект ТСП</b><span>раскладка · спецификация · пачки · машины</span></div>
+    </div>
+    <div class="proj"><input id="projName" type="text" aria-label="Название объекта" placeholder="Название объекта"></div>
+    <div class="actions">
+      <button class="ghost" id="btnOpen" type="button">Открыть .json</button>
+      <button class="ghost" id="btnSave" type="button">Сохранить .json</button>
+      <button class="ghost" id="btnXlsx" type="button">Excel</button>
+      <button class="ghost" id="btnReport" type="button">Отчёт .html</button>
+      <input id="fileJson" type="file" accept=".json,application/json" hidden>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ===== Расчётное ядро: раскладка ТСП, спецификация, упаковка, загрузка машин ===== */
+const DEFAULTS = {
+  panel: { maker: "МП ТСП", thickness: 100, width: 1000, lock: "Z-LOCK", core: "МВ", cls: "1", orient: "horizontal",
+           maxL: 14000, minL: 2000, gap: 10, metal: 0.5, outer: "7004", inner: "9003", band: "", bandRows: 0,
+           corner: "", partColor: "9003", partThickness: 100, rigelStep: 3000, spanWarn: 6000, sealOuter: false },
+  roof: { thickness: 150, width: 1000, outer: "7004", inner: "9003", overlap: 300, eave: 100 },
+  weight: { steel: 7.85, glue: 0.45, dens: { "МВ": 105, "ППС": 25, "PIR": 40 }, roofExtra: 1.73 },
+  pack: { maxH: 1200, foam: 40, roofFeet: 70, maxKg: 3500, roofRib: 40, extraW: 20 },
+  truck: { name: "Еврофура тент 20 т", L: 13600, W: 2450, H: 2400, tiers: 3, payload: 20000, overhang: 500 },
+  fiPallet: { pcs: 500, maxKg: 1000, L: 2000, H: 600, W: 1200 },
+  fix: { wallPerSup: 3, partPerSup: 2, roofPerPurlin: 3, fiStep: 300, anchorStep: 500, roofStitch: 500, cartridgeM: 10, reserve: 5 },
+  screws: {
+    "Z-LOCK": { 50: 105, 60: 105, 80: 115, 100: 140, 120: 160, 150: 190, 170: 240, 180: 240, 200: 240, 250: 315, 300: 350 },
+    "SECRET FIX": { 50: 85, 60: 85, 80: 105, 100: 130, 120: 150, 150: 190 },
+    "roof": { 50: 140, 60: 150, 80: 190, 100: 190, 120: 240, 150: 240, 170: 285, 180: 285, 200: 285, 250: 350 },
+  },
+};
+
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const uniqSort = (a) => [...new Set(a.map(Number))].sort((x, y) => x - y);
+const r10 = (v) => Math.floor(v / 10) * 10;
+const isWin = (t) => /окн|витраж/i.test(t || "");
+const isDoor = (t) => /двер|ворот/i.test(t || "");
+
+function kgm2(P, t, core, roof) {
+  const dens = P.weight.dens[core] ?? 105;
+  return P.weight.steel * (P.panel.metal / 0.5) + dens * t / 1000 + P.weight.glue + (roof ? P.weight.roofExtra : 0);
+}
+function screwLen(P, kind, t) {
+  const tab = kind === "roof" ? P.screws.roof : (P.screws[P.panel.lock] || P.screws["Z-LOCK"]);
+  const ks = Object.keys(tab).map(Number).sort((a, b) => a - b);
+  const k = ks.find((x) => x >= t) ?? ks[ks.length - 1];
+  return tab[k];
+}
+function desig(P, kind, t, W, outer, inner) {
+  const lk = kind === "roof" ? "K" : (P.panel.lock === "SECRET FIX" ? "S" : "Z");
+  const m = String(P.panel.metal).replace(".", ",");
+  return `${P.panel.maker}-${lk}-${t}-${W}-Н-Н-${P.panel.core}-(ПЭ-01-${outer}-${m}\\ПЭ-01-${inner}-${m})-${P.panel.cls} класс-ГОСТ 32603-2021`;
+}
+
+function subIntervals(a, b, holes) {
+  let segs = [[a, b]];
+  for (const [h0, h1] of [...holes].sort((x, y) => x[0] - y[0])) {
+    const nw = [];
+    for (const [s0, s1] of segs) {
+      if (h1 <= s0 || h0 >= s1) { nw.push([s0, s1]); continue; }
+      if (h0 > s0) nw.push([s0, h0]);
+      if (h1 < s1) nw.push([h1, s1]);
+    }
+    segs = nw;
+  }
+  return segs.filter((s) => s[1] - s[0] > 0);
+}
+
+function globalJoints(a, b, cols, maxL, minL) {
+  const len = b - a, res = [];
+  if (len <= maxL) return res;
+  const k = Math.ceil(len / maxL);
+  let start = a;
+  for (let i = 1; i < k; i++) {
+    const target = a + (len * i) / k;
+    let cand = cols.filter((c) => c >= start + minL && c <= start + maxL && c <= b - minL);
+    if (!cand.length) cand = cols.filter((c) => c > start && c <= start + maxL);
+    if (!cand.length) break;
+    const pick = cand.reduce((p, c) => (Math.abs(c - target) < Math.abs(p - target) ? c : p));
+    res.push(pick); start = pick;
+  }
+  while (b - start > maxL) {
+    const cand = cols.filter((c) => c > start + minL && c <= start + maxL);
+    if (!cand.length) break;
+    const pick = Math.max(...cand); res.push(pick); start = pick;
+  }
+  return res;
+}
+
+function supportsOf(w) {
+  let s = [...(w.columns || []), ...(w.posts || [])];
+  for (const o of w.openings || []) { if (o.x0 > w.x0 && o.x0 < w.x1) s.push(o.x0); if (o.x1 > w.x0 && o.x1 < w.x1) s.push(o.x1); }
+  if (w.kind === "part") s.push(w.x0, w.x1);
+  return uniqSort(s);
+}
+
+/* --- горизонтальная раскладка стены --- */
+function layoutHorizontal(w, P, flags) {
+  const W = w.kind === "part" ? P.panel.width : P.panel.width;
+  const H = w.height, rise = w.gable && w.gable.rise > 0 ? w.gable.rise : 0, Ht = H + rise, n = Math.ceil(Ht / W - 1e-9);
+  const rows = [];
+  for (let i = 0; i < n; i++) rows.push([i * W, Math.min(Ht, (i + 1) * W)]);
+  const gableClip = (y) => {
+    if (!rise || y < H - 1e-6) return [w.x0, w.x1];
+    const f = Math.max(0, 1 - (y - H) / rise), Lw = w.x1 - w.x0;
+    if (w.gable.type === "1") return [w.x1 - Lw * f, w.x1];
+    const c = (w.x0 + w.x1) / 2; return [c - (Lw / 2) * f, c + (Lw / 2) * f];
+  };
+  const sup = supportsOf(w);
+  const cols = uniqSort(w.columns && w.columns.length ? w.columns : sup);
+  const gj = globalJoints(w.x0, w.x1, cols, P.panel.maxL, P.panel.minL);
+  const pieces = [];
+  rows.forEach(([y0, y1], ri) => {
+    const color = w.kind === "part" ? P.panel.partColor
+      : (P.panel.band && y0 >= H - P.panel.bandRows * W - 1 && y0 < H ? P.panel.band : P.panel.outer);
+    const inner = w.kind === "part" ? P.panel.partColor : P.panel.inner;
+    const ops = w.openings || [];
+    const full = ops.filter((o) => o.y0 <= y0 && o.y1 >= y1);
+    const part = ops.filter((o) => o.y0 < y1 && o.y1 > y0 && !full.includes(o));
+    const [ga, gb] = gableClip(y0), gTop = gableClip(y1);
+    const segsRow = subIntervals(w.x0, w.x1, full.map((o) => [o.x0, o.x1])).map(([a, b]) => [Math.max(a, Math.floor(ga / 10) * 10), Math.min(b, Math.ceil(gb / 10) * 10)]).filter(([a, b]) => b - a >= 100);
+    for (const [a, b] of segsRow) {
+      let ps = [[a, b]];
+      for (const p of gj) {
+        const nw = [];
+        for (const [c, d] of ps) { if (c + P.panel.minL <= p && p <= d - P.panel.minL) nw.push([c, p], [p, d]); else nw.push([c, d]); }
+        ps = nw;
+      }
+      let changed = true, guard = 0;
+      while (changed && guard++ < 50) {
+        changed = false; const nw = [];
+        for (const [c, d] of ps) {
+          if (d - c > P.panel.maxL) {
+            let cand = sup.filter((s) => s >= c + P.panel.minL && s <= Math.min(c + P.panel.maxL, d - P.panel.minL));
+            if (!cand.length) cand = sup.filter((s) => s > c && s < d);
+            if (!cand.length) { nw.push([c, d]); flags.push({ lvl: "err", wall: w.code, t: `ряд ${ri + 1}: участок ${d - c} мм длиннее ${P.panel.maxL} и без опор — нужна стойка` }); continue; }
+            const s = cand.reduce((p, q) => (Math.min(q - c, d - q) > Math.min(p - c, d - p) ? q : p));
+            nw.push([c, s], [s, d]); changed = true;
+          } else nw.push([c, d]);
+        }
+        ps = nw;
+      }
+      for (const [c, d] of ps) {
+        const cuts = [];
+        for (const o of part) {
+          if (o.x1 <= c || o.x0 >= d) continue;
+          cuts.push({ x0: Math.max(o.x0, c), x1: Math.min(o.x1, d), y0: Math.max(o.y0, y0), y1: Math.min(o.y1, y1) });
+        }
+        const inside = sup.filter((s) => s >= c - 1 && s <= d + 1);
+        const jl = c !== a, jr = d !== b;
+        let L = d - c - (jl ? P.panel.gap / 2 : 0) - (jr ? P.panel.gap / 2 : 0);
+        if (jl || jr) L = r10(L);
+        let span = 0; for (let i = 1; i < inside.length; i++) span = Math.max(span, inside[i] - inside[i - 1]);
+        const diag = rise && y1 > H + 1e-6 && (c < gTop[0] - 1 || d > gTop[1] + 1);
+        pieces.push({ wall: w.code, kind: w.kind, row: ri, x0: c, x1: d, y0, y1, L, b: y1 - y0, color, inner, cuts, diag,
+                      nsup: diag ? Math.max(2, inside.length) : inside.length, supports: inside, span, t: w.kind === "part" ? P.panel.partThickness : P.panel.thickness, W });
+        if (inside.length < 2 && !diag) flags.push({ lvl: "err", wall: w.code, t: `ряд ${ri + 1}, x ${c}…${d}: панель опирается менее чем на 2 опоры — нужна стойка` });
+      }
+    }
+  });
+  return { rows, pieces };
+}
+
+/* --- вертикальная раскладка стены (Z-LOCK) --- */
+function layoutVertical(w, P, flags) {
+  const W = P.panel.width, H = w.height, pieces = [];
+  const strips = [];
+  for (let sx = w.x0; sx < w.x1 - 1; sx += W) strips.push([sx, Math.min(w.x1, sx + W)]);
+  const rig = P.panel.rigelStep;
+  strips.forEach(([sx, ex], si) => {
+    const ops = w.openings || [];
+    const full = ops.filter((o) => o.x0 <= sx && o.x1 >= ex);
+    const part = ops.filter((o) => o.x0 < ex && o.x1 > sx && !full.includes(o));
+    for (const [a, b] of subIntervals(0, H, full.map((o) => [o.y0, o.y1]))) {
+      let ps = [[a, b]], guard = 0;
+      while (ps.some(([c, d]) => d - c > P.panel.maxL) && guard++ < 20) {
+        ps = ps.flatMap(([c, d]) => {
+          if (d - c <= P.panel.maxL) return [[c, d]];
+          const mid = (c + d) / 2; const s = Math.round(mid / rig) * rig;
+          return [[c, s], [s, d]];
+        });
+      }
+      for (const [c, d] of ps) {
+        const cuts = [];
+        for (const o of part) {
+          if (o.y1 <= c || o.y0 >= d) continue;
+          cuts.push({ x0: Math.max(o.x0, sx), x1: Math.min(o.x1, ex), y0: Math.max(o.y0, c), y1: Math.min(o.y1, d) });
+        }
+        const nsup = Math.max(2, Math.floor((d - c) / rig) + 1);
+        const color = P.panel.band && d > H - P.panel.bandRows * 1000 && w.kind !== "part" ? P.panel.band : (w.kind === "part" ? P.panel.partColor : P.panel.outer);
+        pieces.push({ wall: w.code, kind: w.kind, row: si, x0: sx, x1: ex, y0: c, y1: d, L: d - c, b: ex - sx, color,
+                      inner: w.kind === "part" ? P.panel.partColor : P.panel.inner, cuts, nsup, supports: [], span: rig,
+                      t: w.kind === "part" ? P.panel.partThickness : P.panel.thickness, W, vertical: true });
+      }
+    }
+  });
+  return { rows: [[0, H]], pieces };
+}
+
+/* --- кровля --- */
+function layoutRoof(R, P, flags) {
+  const W = P.roof.width, pieces = [];
+  const S = R.slopeLength + (P.roof.eave || 0), ov = P.roof.overlap, maxL = P.panel.maxL;
+  const k = S <= maxL ? 1 : Math.ceil((S - ov) / (maxL - ov));
+  const Ls = [];
+  if (k === 1) Ls.push(S); else { const each = Math.ceil((S + (k - 1) * ov) / k / 10) * 10; for (let i = 0; i < k; i++) Ls.push(i < k - 1 ? each : S + (k - 1) * ov - each * (k - 1)); }
+  if (R.slopeDeg != null) {
+    const need = k > 1 ? 8 : 5;
+    if (R.slopeDeg < need) flags.push({ lvl: "err", wall: "Кровля", t: `уклон ${R.slopeDeg}° меньше допустимого ${need}° (СП 362, минвата${k > 1 ? ", стык по скату" : ""}) — кровлю из ТСП делать нельзя` });
+  }
+  const nAcross = Math.ceil(R.length / W - 1e-9);
+  for (let s = 0; s < (R.slopes || 1); s++) {
+    for (let i = 0; i < nAcross; i++) {
+      let y = 0;
+      Ls.forEach((L, j) => {
+        pieces.push({ wall: "К" + (s + 1), kind: "roof", row: j, x0: i * W, x1: Math.min(R.length, (i + 1) * W), y0: y, y1: y + L,
+                      L, b: W, color: P.roof.outer, inner: P.roof.inner, cuts: [], nsup: Math.max(2, Math.floor(L / (R.purlinStep || 1500)) + 1),
+                      supports: [], span: R.purlinStep || 1500, t: P.roof.thickness, W, slope: s });
+        y += L - ov;
+      });
+    }
+  }
+  if (R.purlinStep > 3000) flags.push({ lvl: "warn", wall: "Кровля", t: `шаг прогонов ${R.purlinStep} мм больше 3 м — проверить по таблицам несущей способности и цвету` });
+  return { pieces, k, Ls, nAcross, S };
+}
+
+function npcs(L, std, ov) { if (L <= 0) return 0; if (L <= std) return 1; return Math.ceil((L - ov) / (std - ov)); }
+
+/* ============ главный расчёт ============ */
+function compute(project, P) {
+  const flags = [];
+  const walls = (project.walls || []).map((w) => ({ ...w, openings: (w.openings || []).map((o) => ({ ...o })) }));
+  const out = { walls: [], roof: null, flags };
+  for (const w of walls) {
+    if (!(w.x1 > w.x0) || !(w.height > 0)) { flags.push({ lvl: "err", wall: w.code, t: "не заданы длина или высота стены" }); continue; }
+    const res = P.panel.orient === "vertical" && w.kind !== "part" ? layoutVertical(w, P, flags) : layoutHorizontal(w, P, flags);
+    const sup = supportsOf(w);
+    const known = new Set([...(w.columns || []), ...(w.posts || []), ...(w.kind === "part" ? [w.x0, w.x1] : [])].map(Number));
+    w.needPosts = sup.filter((s) => !known.has(s));
+    if (w.needPosts.length && P.panel.orient !== "vertical")
+      flags.push({ lvl: "warn", wall: w.code, t: `нет стоек у проёмов в точках x = ${w.needPosts.join(", ")} мм — выполнить стойки обрамления по расчёту` });
+    const longSpan = res.pieces.filter((p) => p.span > P.panel.spanWarn);
+    if (longSpan.length && P.panel.orient !== "vertical")
+      flags.push({ lvl: "warn", wall: w.code, t: `${longSpan.length} панелей с пролётом между опорами > ${P.panel.spanWarn} мм (макс. ${Math.max(...longSpan.map((p) => p.span))}) — проверить расчётом или добавить стойку` });
+    out.walls.push({ ...w, rows: res.rows, pieces: res.pieces, sup });
+  }
+  if (project.roof && project.roof.length > 0 && project.roof.slopeLength > 0) {
+    const r = layoutRoof(project.roof, P, flags);
+    out.roof = { ...project.roof, ...r, code: "К", title: "Кровля" };
+  }
+  const allPieces = [...out.walls.flatMap((w) => w.pieces), ...(out.roof ? out.roof.pieces : [])];
+
+  /* марки */
+  const marks = new Map();
+  const groupOf = (p) => p.kind === "roof" ? "К" : p.wall;
+  const counters = {};
+  const sorted = [...allPieces].sort((a, b) => (groupOf(a) > groupOf(b) ? 1 : groupOf(a) < groupOf(b) ? -1 : a.row - b.row || a.x0 - b.x0));
+  for (const p of sorted) {
+    const rel = p.cuts.map((c) => [c.x0 - p.x0, c.x1 - p.x0, c.y0 - p.y0, c.y1 - p.y0].join(",")).sort().join(";");
+    const key = [groupOf(p), p.kind, p.t, p.color, p.inner, p.L, p.b, rel, p.diag ? "d" : ""].join("|");
+    if (!marks.has(key)) {
+      const g = groupOf(p);
+      counters[g] = (counters[g] || 0) + 1;
+      const pre = p.kind === "roof" ? "К" : p.kind === "part" ? g : "С-" + g;
+      marks.set(key, { mark: `${pre}-${String(counters[g]).padStart(2, "0")}`, kind: p.kind, wall: g, t: p.t, W: p.W, color: p.color, inner: p.inner,
+                       L: p.L, b: p.b, cuts: p.cuts.map((c) => ({ x0: c.x0 - p.x0, x1: c.x1 - p.x0, y0: c.y0 - p.y0, y1: c.y1 - p.y0 })), vertical: !!p.vertical, diag: !!p.diag, n: 0, blanks: new Set() });
+    }
+    const m = marks.get(key); m.n++; p.mark = m.mark;
+  }
+
+  /* короткие → заготовки */
+  const blanks = [];
+  const short = allPieces.filter((p) => p.L < P.panel.minL);
+  const gr = {};
+  for (const p of short) { const k = [p.kind, p.t, p.color, p.inner].join("|"); (gr[k] = gr[k] || []).push(p); }
+  for (const k of Object.keys(gr)) {
+    const lst = gr[k].sort((a, b) => b.L - a.L), bins = [];
+    for (const p of lst) {
+      let placed = false;
+      for (const b of bins) if (b.sum + p.L + 10 <= 6000 && b.sum < P.panel.minL) { b.items.push(p); b.sum += p.L + 10; placed = true; break; }
+      if (!placed) bins.push({ items: [p], sum: p.L });
+    }
+    for (const b of bins) {
+      const p0 = b.items[0];
+      const name = `З-${String(blanks.length + 1).padStart(2, "0")}`;
+      const Lb = Math.max(P.panel.minL, Math.ceil(b.sum / 10) * 10);
+      b.items.forEach((p) => { p.blank = name; for (const m of marks.values()) if (m.mark === p.mark) m.blanks.add(name); });
+      blanks.push({ name, kind: p0.kind, t: p0.t, W: p0.W, color: p0.color, inner: p0.inner, L: Lb,
+                    items: b.items.map((p) => ({ mark: p.mark, L: p.L, b: p.b })), waste: Lb - b.sum });
+    }
+  }
+
+  /* позиции заказа (одинаковые длины сводятся) */
+  const order = new Map();
+  for (const m of marks.values()) {
+    if (m.L < P.panel.minL) continue;
+    const kind = m.kind === "roof" ? "roof" : "wall";
+    const key = [kind, m.t, m.W, m.color, m.inner, m.L].join("|");
+    if (!order.has(key)) order.set(key, { kind, t: m.t, W: m.W, color: m.color, inner: m.inner, L: m.L, n: 0, marks: [], notes: [] });
+    const o = order.get(key); o.n += m.n; o.marks.push(`${m.mark}×${m.n}`);
+    if (m.b !== m.W) o.notes.push(`${m.mark}: распустить до ${m.b} мм`);
+    if (m.cuts.length) o.notes.push(`${m.mark}: вырезы ${m.cuts.map((c) => `${c.x1 - c.x0}×${c.y1 - c.y0}`).join(", ")}`);
+    if (m.diag) o.notes.push(`${m.mark}: срез по уклону фронтона по месту`);
+  }
+  for (const b of blanks) {
+    const kind = b.kind === "roof" ? "roof" : "wall";
+    const key = [kind, b.t, b.W, b.color, b.inner, b.L, "blank", b.name].join("|");
+    order.set(key, { kind, t: b.t, W: b.W, color: b.color, inner: b.inner, L: b.L, n: 1, marks: [b.name], blank: true,
+                     notes: [`разрезать: ${b.items.map((i) => `${i.mark} ${i.L}×${i.b}`).join(" + ")}`] });
+  }
+  const orderList = [...order.values()].sort((a, b) => (a.kind > b.kind ? 1 : a.kind < b.kind ? -1 : 0) || (a.color > b.color ? 1 : a.color < b.color ? -1 : 0) || b.L - a.L);
+  orderList.forEach((o, i) => {
+    o.pos = i + 1;
+    o.desig = desig(P, o.kind, o.t, o.W, o.color, o.inner);
+    o.area = (o.L * o.W) / 1e6 * o.n;
+    o.kgm2 = kgm2(P, o.t, P.panel.core, o.kind === "roof");
+    o.kg = o.area * o.kgm2;
+  });
+
+  /* ===== фасонные изделия ===== */
+  const FI = new Map();
+  const fi = (code, name, color, mat, razv, sketch, L, n = 1, std = 2000, ov = 0) => {
+    if (L <= 0) return;
+    if (!FI.has(code)) FI.set(code, { code, name, color, mat, razv, sketch, std, len: 0, pcs: 0 });
+    const f = FI.get(code); f.len += (L * n) / 1000; f.pcs += npcs(L, std, ov) * n;
+  };
+  const ext = out.walls.filter((w) => w.kind !== "part"), parts = out.walls.filter((w) => w.kind === "part");
+  const OC = "RAL " + P.panel.outer, IC = "RAL " + P.panel.inner, BC = "RAL " + (P.panel.band || P.panel.outer);
+  const CC = "RAL " + (P.panel.corner || P.panel.band || P.panel.outer);
+  const ST = `сталь ${String(P.panel.metal).replace(".", ",")} мм ПЭ`, FU = "оцинк. сталь 2,0 мм";
+  const jointsOf = (w) => {
+    const byRow = {};
+    for (const p of w.pieces) (byRow[p.row] = byRow[p.row] || []).push(p);
+    const runs = [];
+    for (const r of Object.keys(byRow)) {
+      const lst = byRow[r].sort((a, b) => a.x0 - b.x0);
+      for (let i = 1; i < lst.length; i++) if (lst[i].x0 === lst[i - 1].x1) runs.push({ x: lst[i].x0, y0: lst[i].y0, y1: lst[i].y1, color: lst[i].color });
+    }
+    return runs;
+  };
+  for (const w of ext) {
+    const holes = (w.openings || []).filter((o) => o.y0 <= 0).map((o) => [o.x0, o.x1]);
+    for (const [a, b] of subIntervals(w.x0, w.x1, holes)) {
+      fi("ФИУ-1", "Опорный элемент цоколя (уголок)", "оцинк.", FU, 230, "L 110×120", b - a, 1, 1250, 0);
+      fi("ФИ-1", "Отлив цокольный", OC, ST, 200, "полка 130 + капельник 50 + подгиб 20", b - a, 1, 2000, 50);
+    }
+    if (P.panel.orient !== "vertical") {
+      for (const j of jointsOf(w)) {
+        const band = P.panel.band && j.color === P.panel.band;
+        fi(band ? "ФИ-4" : "ФИ-3", "Нащельник вертикальный наружный (стык панелей)", band ? BC : OC, ST, 170, "плоский 150 + подгибы 10", j.y1 - j.y0, 1, 2000, 100);
+        fi("ФИ-11", "Нащельник вертикальный внутренний (стык панелей)", IC, ST, 120, "плоский 100 + подгибы 10", j.y1 - j.y0, 1, 2000, 100);
+      }
+    } else {
+      const tiers = {};
+      for (const p of w.pieces) if (p.y0 > 0 && !(w.openings || []).some((o) => Math.abs(o.y1 - p.y0) < 1)) tiers[p.y0] = (tiers[p.y0] || 0) + (p.x1 - p.x0);
+      for (const y of Object.keys(tiers)) fi("ФИ-3Г", "Нащельник горизонтальный (стык ярусов, шов 20 мм)", OC, ST, 200, "Z-профиль 20/150 + подгибы", tiers[y], 1, 2000, 50);
+    }
+    for (const o of w.openings || []) {
+      const ow = o.x1 - o.x0, oh = o.y1 - o.y0;
+      fi("ФИ-5", "Откос проёма наружный", OC, ST, 210, "Г 130×60 + подгибы", oh, 2, 2000, 100);
+      fi("ФИ-6", "Нащельник (козырёк) над проёмом", OC, ST, 220, "полка 130 + капельник 60", ow, 1, 2000, 50);
+      fi("ФИ-12", "Обрамление проёма внутреннее", IC, ST, 160, "Г 100×50 + подгиб", oh, 2, 2000, 100);
+      fi("ФИ-12", "Обрамление проёма внутреннее", IC, ST, 160, "Г 100×50 + подгиб", ow, isWin(o.type) ? 2 : 1, 2000, 50);
+      if (isWin(o.type)) fi("ФИ-7", "Отлив оконный", OC, ST, 230, "полка 160 + капельник 50", ow, 1, 2000, 50);
+      if (isDoor(o.type)) { fi("ФИУ-2", "Обрамление ворот/дверей (П-профиль)", "оцинк.", FU, 200, "П 50×100×50", oh, 2, 1250, 0); fi("ФИУ-2", "Обрамление ворот/дверей (П-профиль)", "оцинк.", FU, 200, "П 50×100×50", ow, 1, 1250, 0); }
+    }
+    const Lw = w.x1 - w.x0;
+    if (out.roof) fi("ФИ-9", "Нащельник примыкания стены к кровле", BC, ST, 300, "Г 150×120 + подгибы", Lw, 1, 2000, 50);
+    else fi("ФИ-8", "Крышка парапета", BC, ST, 360, "верх 120 + полки 80/140", Lw, 1, 2000, 50);
+  }
+  const Hmax = ext.length ? Math.max(...ext.map((w) => w.height)) : 0;
+  const corners = project.corners ?? (ext.length >= 4 ? 4 : Math.max(0, ext.length - 1));
+  if (corners && Hmax) {
+    fi("ФИ-2", "Угол наружный", CC, ST, 420, "полки 200×200 + подгибы", Hmax, corners, 2000, 100);
+    fi("ФИ-10", "Угол внутренний", IC, ST, 220, "полки 100×100 + подгибы", Hmax, corners, 2000, 100);
+  }
+  const PC = "RAL " + P.panel.partColor;
+  for (const w of parts) {
+    const Lw = w.x1 - w.x0;
+    const doors = (w.openings || []).filter((o) => o.y0 <= 0).reduce((s, o) => s + (o.x1 - o.x0), 0);
+    fi("ФИ-13", "Уголок перегородки к полу / перекрытию", PC, ST, 120, "Г 50×60 + подгиб", Lw - doors, 2, 2000, 50);
+    fi("ФИ-13", "Уголок перегородки к полу / перекрытию", PC, ST, 120, "Г 50×60 + подгиб", Lw, 2, 2000, 50);
+    fi("ФИ-14", "Уголок примыкания перегородки к стене", PC, ST, 120, "Г 50×60 + подгиб", w.height, 4, 2000, 100);
+    for (const j of jointsOf(w)) fi("ФИ-11П", "Нащельник стыка панелей перегородки", PC, ST, 120, "плоский 100 + подгибы", j.y1 - j.y0, 2, 2000, 100);
+    for (const o of w.openings || []) { fi("ФИ-15", "Обрамление проёма в перегородке (П)", PC, ST, 260, "П 50×100×50", o.y1 - o.y0, 2, 2000, 100); fi("ФИ-15", "Обрамление проёма в перегородке (П)", PC, ST, 260, "П 50×100×50", o.x1 - o.x0, 1, 2000, 50); }
+  }
+  if (out.roof) {
+    const R = out.roof, RC = "RAL " + P.roof.outer, RI = "RAL " + P.roof.inner, ns = R.slopes || 1;
+    fi("ФИ-К1", "Торцевая планка кровли", RC, ST, 350, "Г 150×150 + подгибы", R.S, 2 * ns, 2000, 100);
+    fi("ФИ-К2", "Карнизная планка (капельник)", RC, ST, 200, "Г 80×100 + капельник", R.length, ns, 2000, 50);
+    if (ns === 2) { fi("ФИ-К3", "Конёк наружный", RC, ST, 500, "2×200 + подгибы, угол по уклону", R.length, 1, 2000, 100); fi("ФИ-К4", "Конёк внутренний", RI, ST, 300, "2×120 + подгибы", R.length, 1, 2000, 100); }
+  }
+  const fiList = [...FI.values()].map((f) => ({ ...f, len: Math.round(f.len * 10) / 10, pcsRes: Math.ceil(f.pcs * (1 + P.fix.reserve / 100)) }));
+
+  /* ===== крепёж ===== */
+  const FX = new Map();
+  const fx = (key, name, size, purpose, norm, qty, pack, unitKg) => {
+    if (!FX.has(key)) FX.set(key, { name, size, purpose, norm, qty: 0, pack, unitKg });
+    FX.get(key).qty += qty;
+  };
+  const scrWall = screwLen(P, "wall", P.panel.thickness), scrPart = screwLen(P, "wall", P.panel.partThickness), scrRoof = screwLen(P, "roof", P.roof.thickness);
+  for (const w of out.walls) for (const p of w.pieces) {
+    if (w.kind === "part") fx("sp", `Саморез для сэндвич-панелей с EPDM, RAL ${P.panel.partColor}`, `5,5/6,3×${scrPart}`, "Панели перегородок к опорам", `${P.fix.partPerSup} шт. на панель в опоре`, p.nsup * P.fix.partPerSup, 100, 0.035);
+    else { const per = p.b >= 800 ? P.fix.wallPerSup : 2; fx("sw" + p.color, `Саморез для сэндвич-панелей с EPDM, RAL ${p.color}`, `5,5/6,3×${scrWall}`, "Стеновые панели к колоннам/ригелям", `${P.fix.wallPerSup} шт. на панель в опоре`, p.nsup * per, 100, 0.04); }
+  }
+  if (out.roof) {
+    for (const p of out.roof.pieces) fx("sr", `Саморез кровельный для сэндвич-панелей с EPDM, RAL ${P.roof.outer}`, `5,5/6,3×${scrRoof}`, "Кровельные панели к прогонам (в гребень)", `${P.fix.roofPerPurlin} шт. на прогон`, p.nsup * P.fix.roofPerPurlin, 100, 0.05);
+    const R = out.roof, ns = R.slopes || 1;
+    fx("s48r", `Саморез с EPDM, RAL ${P.roof.outer}`, "4,8×28", "Продольный нахлёст кровельных панелей", `шаг ${P.fix.roofStitch} мм`, Math.ceil(R.S / P.fix.roofStitch) * Math.max(0, R.nAcross - 1) * ns, 250, 0.004);
+    if (R.k > 1) fx("rv", "Заклёпка комбинированная", "4,8×10", "Торцевой нахлёст кровельных панелей", "5 шт. на стык", 5 * R.nAcross * (R.k - 1) * ns, 500, 0.002);
+  }
+  const lineFix = (Lm, step, lines, members) => Math.ceil((Lm * 1000) / step) * lines + members * lines;
+  for (const f of fiList) {
+    if (f.code === "ФИУ-1") fx("an", "Шуруп с дюбелем (бетон)", "8×80", "Опорный уголок к цоколю", `шаг ${P.fix.anchorStep} мм`, lineFix(f.len, P.fix.anchorStep, 1, f.pcs), 50, 0.03);
+    else if (f.code === "ФИУ-2") fx("s55", "Саморез с EPDM", "5,5×32", "ФИУ / уголки к металлокаркасу", `шаг ${P.fix.fiStep} мм`, lineFix(f.len, P.fix.fiStep, 1, f.pcs), 250, 0.006);
+    else if (f.code === "ФИ-13") {
+      fx("s42", "Саморез с прессшайбой оцинк.", "4,2×16", "Внутренние ФИ к панелям", `шаг ${P.fix.fiStep} мм`, lineFix(f.len, P.fix.fiStep, 1, f.pcs), 1000, 0.002);
+      fx("dw", "Дюбель-гвоздь", "6×40", "Уголок перегородки к полу", "шаг 500 мм", lineFix(f.len / 2, 500, 1, Math.ceil(f.pcs / 2)), 100, 0.006);
+      fx("s55", "Саморез с EPDM", "5,5×32", "ФИУ / уголки к металлокаркасу", `шаг ${P.fix.fiStep} мм`, lineFix(f.len / 2, 500, 1, Math.ceil(f.pcs / 2)), 250, 0.006);
+    } else if (f.color === IC || f.color === PC) fx("s42", "Саморез с прессшайбой оцинк.", "4,2×16", "Внутренние ФИ к панелям", `шаг ${P.fix.fiStep} мм, 2 линии`, lineFix(f.len, P.fix.fiStep, 2, f.pcs), 1000, 0.002);
+    else fx("s48" + f.color, `Саморез с EPDM, головка ${f.color}`, "4,8×28", "Наружные ФИ к панелям", `шаг ${P.fix.fiStep} мм, 2 линии`, lineFix(f.len, P.fix.fiStep, 2, f.pcs), 250, 0.004);
+  }
+  const fxList = [...FX.values()].filter((x) => x.qty > 0).map((x) => { const q = Math.ceil(x.qty * (1 + P.fix.reserve / 100)); return { ...x, qtyRes: q, packs: Math.ceil(q / x.pack), kg: q * x.unitKg }; });
+
+  /* ===== уплотнители ===== */
+  let uptp = 0, lock = 0, outerLock = 0;
+  for (const w of out.walls) {
+    if (P.panel.orient !== "vertical" || w.kind === "part") {
+      for (const s of w.sup) { const rs = new Set(); for (const p of w.pieces) if (p.x0 - 1 <= s && s <= p.x1 + 1) rs.add(p.row); for (const r of rs) uptp += (w.rows[r][1] - w.rows[r][0]) / 1000; }
+    } else uptp += ((w.x1 - w.x0) / 1000) * (Math.floor(w.height / P.panel.rigelStep) + 1);
+    if (w.kind !== "part") {
+      if (P.panel.orient !== "vertical") {
+        const byRow = {}; for (const p of w.pieces) (byRow[p.row] = byRow[p.row] || []).push(p);
+        for (let r = 1; r < w.rows.length; r++) for (const a of byRow[r] || []) for (const b of byRow[r - 1] || []) lock += Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) / 1000;
+      } else lock += w.pieces.reduce((s, p) => s + p.L, 0) / 1000;
+    }
+  }
+  const sealOuter = P.panel.orient === "vertical" || P.panel.sealOuter || ext.some((w) => w.base + w.height > 20000);
+  outerLock = sealOuter ? lock : 0;
+  const outerFiLen = fiList.filter((f) => f.color !== IC && f.color !== PC && !f.code.startsWith("ФИУ")).reduce((s, f) => s + f.len, 0);
+  const seals = [
+    { name: "Лента уплотнительная терморазделяющая (УПТП) по опорам", unit: "п.м", qty: Math.round(uptp * 1.1), base: "Σ длин опирания панелей на колонны/ригели/прогоны +10%" },
+    { name: "Герметик внутреннего замкового стыка", unit: "п.м", qty: Math.round(lock * 1.05), base: "внутренний стык — всегда" },
+    { name: "Герметик наружного замкового стыка", unit: "п.м", qty: Math.round(outerLock * 1.05), base: sealOuter ? "вертикальная раскладка / высота > 20 м / задано" : "не требуется (горизонтальная раскладка, H ≤ 20 м)" },
+    { name: "Герметик под наружные фасонные изделия", unit: "п.м", qty: Math.round(outerFiLen * 1.05), base: "одна нитка по примыканию" },
+  ];
+  const cart = Math.ceil((seals[1].qty + seals[2].qty + seals[3].qty) / P.fix.cartridgeM);
+  seals.push({ name: "Герметик — картриджи 280 мл (всего)", unit: "шт.", qty: cart, base: `≈${P.fix.cartridgeM} п.м на картридж` });
+  if (out.roof) {
+    const R = out.roof, ns = R.slopes || 1;
+    const prof = (R.length / 1000) * (ns + (ns === 2 ? 2 : 1));
+    seals.push({ name: "Уплотнитель кровельный профильный верхний (МП ТСП-К-А)", unit: "п.м", qty: Math.ceil(prof), base: "конёк ×2 + карниз" });
+    seals.push({ name: "Уплотнитель кровельный профильный нижний (МП ТСП-К-В)", unit: "п.м", qty: Math.ceil(prof), base: "конёк ×2 + карниз" });
+    seals.push({ name: "Лента бутилкаучуковая для торцевого нахлёста", unit: "п.м", qty: Math.ceil((R.length / 1000) * (R.k - 1) * ns * 2), base: "2 нитки на поперечный стык" });
+  }
+  const jointsLen = out.walls.reduce((s, w) => s + jointsOf(w).reduce((a, j) => a + (j.y1 - j.y0) / 1000, 0), 0);
+  seals.push({ name: "Минвата для уплотнения стыков и примыканий (оценка)", unit: "м³", qty: Math.round((jointsLen * 0.002 + corners * Hmax / 1000 * 0.01 + 0.002 * out.walls.reduce((s, w) => s + (w.openings || []).reduce((a, o) => a + 2 * (o.x1 - o.x0 + o.y1 - o.y0) / 1000, 0), 0)) * 1.2 * 100) / 100, base: "стыки 100×20, углы 100×100, проёмы 100×20" });
+
+  /* ===== упаковка в пачки ===== */
+  const groups = new Map();
+  for (const o of orderList) {
+    const key = [o.kind, o.t, o.W, o.color, o.inner].join("|");
+    if (!groups.has(key)) groups.set(key, { kind: o.kind, t: o.t, W: o.W, color: o.color, inner: o.inner, items: [] });
+    for (let i = 0; i < o.n; i++) groups.get(key).items.push({ L: o.L, pos: o.pos, mk: o.blank ? o.marks[0] : `поз.${o.pos} L${o.L}`, kg: (o.L * o.W) / 1e6 * o.kgm2 });
+  }
+  const packs = [];
+  for (const g of groups.values()) {
+    const roof = g.kind === "roof";
+    const teff = roof ? g.t + P.pack.roofRib / 2 : g.t;
+    const nByH = Math.max(1, Math.floor((P.pack.maxH - P.pack.foam - (roof ? P.pack.roofFeet : 0)) / teff));
+    const items = g.items.sort((a, b) => b.L - a.L);
+    let cur = null;
+    for (const it of items) {
+      if (!cur || cur.items.length >= nByH || cur.kg + it.kg > P.pack.maxKg) {
+        cur = { kind: g.kind, t: g.t, W: g.W, color: g.color, inner: g.inner, items: [], kg: 0, teff, nByH, roof };
+        packs.push(cur);
+      }
+      cur.items.push(it); cur.kg += it.kg;
+    }
+  }
+  packs.forEach((p, i) => {
+    p.id = `П-${String(i + 1).padStart(2, "0")}`;
+    p.n = p.items.length; p.L = Math.max(...p.items.map((x) => x.L)); p.Lmin = Math.min(...p.items.map((x) => x.L));
+    p.h = Math.round(p.n * p.teff + P.pack.foam + (p.roof ? P.pack.roofFeet : 0));
+    p.w = p.W + P.pack.extraW; p.area = p.items.reduce((s, x) => s + (x.L * p.W) / 1e6, 0);
+    const byPos = {}; for (const x of p.items) byPos[x.mk] = (byPos[x.mk] || 0) + 1;
+    p.content = Object.entries(byPos).map(([k, v]) => `${k}×${v}`).join(", ");
+    p.lengths = `${p.L}${p.Lmin !== p.L ? "…" + p.Lmin : ""}`;
+  });
+  // доборные + крепёж — на поддонах
+  const fiKg = fiList.reduce((s, f) => s + f.len * (f.razv / 1000) * (f.mat.includes("2,0") ? 15.7 : 3.925 * (P.panel.metal / 0.5)), 0);
+  const fxKg = fxList.reduce((s, x) => s + x.kg, 0);
+  const fiPcs = fiList.reduce((s, f) => s + f.pcsRes, 0);
+  const nPal = fiPcs ? Math.max(1, Math.ceil(fiPcs / P.fiPallet.pcs), Math.ceil((fiKg + fxKg) / P.fiPallet.maxKg)) : 0;
+  for (let i = 0; i < nPal; i++) packs.push({ id: `ФИ-${i + 1}`, kind: "fi", L: P.fiPallet.L, Lmin: P.fiPallet.L, h: P.fiPallet.H, w: P.fiPallet.W, kg: (fiKg + fxKg) / nPal, n: 0, content: i === 0 ? "фасонные изделия + крепёж, герметики" : "фасонные изделия", lengths: String(P.fiPallet.L), area: 0 });
+
+  /* ===== загрузка машин ===== */
+  const T = P.truck, cap = T.L + T.overhang;
+  const stacks = [];
+  const order2 = [...packs].sort((a, b) => b.L - a.L || b.kg - a.kg);
+  for (const p of order2) {
+    let best = null;
+    for (const s of stacks) {
+      const top = s.items[s.items.length - 1];
+      if (top.L >= p.L && s.h + p.h <= T.H && s.items.length < T.tiers && s.kg + p.kg <= T.payload) {
+        if (!best || top.L - p.L < best.items[best.items.length - 1].L - p.L) best = s;
+      }
+    }
+    if (best) { best.items.push(p); best.h += p.h; best.kg += p.kg; }
+    else stacks.push({ items: [p], L: p.L, h: p.h, kg: p.kg, w: p.w });
+  }
+  const maxW = Math.max(1, ...packs.map((p) => p.w));
+  const lanesN = Math.max(1, Math.floor(T.W / maxW));
+  const trucks = [];
+  for (const s of [...stacks].sort((a, b) => b.L - a.L || b.kg - a.kg)) {
+    if (s.L > cap) { trucks.push({ special: true, lanes: [[s]], used: [s.L], kg: s.kg }); flags.push({ lvl: "err", wall: "Логистика", t: `пачка длиной ${s.L} мм не входит в ${T.name} — нужен длинномер` }); continue; }
+    let placed = false;
+    for (const tr of trucks) {
+      if (tr.special || tr.kg + s.kg > T.payload) continue;
+      const li = tr.used.findIndex((u) => u + s.L <= T.L || (u === 0 && s.L <= cap));
+      if (li >= 0) { tr.lanes[li].push(s); tr.used[li] += s.L; tr.kg += s.kg; placed = true; break; }
+    }
+    if (!placed) { const tr = { lanes: Array.from({ length: lanesN }, () => []), used: Array(lanesN).fill(0), kg: 0 }; tr.lanes[0].push(s); tr.used[0] = s.L; tr.kg = s.kg; trucks.push(tr); }
+  }
+  trucks.forEach((tr, i) => {
+    tr.no = i + 1;
+    tr.packs = tr.lanes.flat().flatMap((s) => s.items);
+    tr.area = tr.packs.reduce((s, p) => s + (p.area || 0), 0);
+    tr.fillL = Math.max(...tr.used) / T.L; tr.fillKg = tr.kg / T.payload;
+    for (const p of tr.packs) p.truck = tr.no;
+  });
+
+  /* сводка */
+  const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+  const net = sum(out.walls, (w) => ((w.x1 - w.x0) * (w.height + (w.gable && w.gable.rise > 0 ? w.gable.rise / 2 : 0)) - sum(w.openings || [], (o) => Math.max(0, Math.min(o.x1, w.x1) - Math.max(o.x0, w.x0)) * Math.max(0, Math.min(o.y1, w.height) - Math.max(o.y0, 0)))) / 1e6)
+    + (out.roof ? ((out.roof.slopes || 1) * out.roof.S * out.roof.length) / 1e6 : 0);
+  const totals = {
+    pieces: allPieces.length, marks: marks.size, positions: orderList.length,
+    orderPcs: sum(orderList, (o) => o.n), orderArea: sum(orderList, (o) => o.area), orderKg: sum(orderList, (o) => o.kg),
+    netArea: net, packs: packs.filter((p) => p.kind !== "fi").length, pallets: nPal, trucks: trucks.length,
+    shipKg: sum(packs, (p) => p.kg), fiPcs, fiKg, fxKg,
+    byColor: Object.values(orderList.reduce((acc, o) => { const k = o.kind + " " + o.color + "/" + o.inner; acc[k] = acc[k] || { key: k, kind: o.kind, color: o.color, inner: o.inner, area: 0, n: 0 }; acc[k].area += o.area; acc[k].n += o.n; return acc; }, {})),
+  };
+  totals.waste = totals.orderArea - net;
+  return { ...out, marks: [...marks.values()], blanks, order: orderList, fi: fiList, fx: fxList, seals, packs, stacks, trucks, lanesN, totals, P };
+}
+
+
+/* ===== Быстрый ввод: прямоугольное здание по основным размерам ===== */
+const QUICK_DEFAULTS = { L: 36, B: 24, H: 7.2, step: 6, fw: 6, off: 300, base: 0,
+  gatesN: 2, gateW: 4000, gateH: 4000, gateWall: "А",
+  doorsN: 1, doorW: 1000, doorH: 2100, doorWall: "А",
+  winN: 4, winW: 2000, winH: 1200, winSill: 2400, winWall: "А+Б",
+  roof: "none", roofDeg: 10, purlin: 1500 };
+function buildQuick(q0, P) {
+  const q = { ...QUICK_DEFAULTS, ...q0 };
+  const L = Math.round(q.L * 1000), B = Math.round(q.B * 1000), H = Math.round(q.H * 1000);
+  const step = Math.max(1000, Math.round(q.step * 1000)), fw = Math.max(0, Math.round(q.fw * 1000)), off = Math.round(q.off);
+  const t = P.panel.thickness, notes = [];
+  const nb = Math.max(1, Math.round(L / step)); const st = L / nb;
+  const lenCols = Array.from({ length: nb + 1 }, (_, i) => Math.round(i * st));
+  const lenAxes = lenCols.map((x, i) => ({ x, name: String(i + 1) }));
+  const fwPosts = []; if (fw > 0) { const k = Math.max(1, Math.round(B / fw)); for (let i = 1; i < k; i++) fwPosts.push(Math.round((i * B) / k)); }
+  const rad = (q.roofDeg || 0) * Math.PI / 180;
+  const roofType = q.roof === "2" || q.roof === "1" ? q.roof : "none";
+  const rise = roofType === "2" ? Math.round((B / 2) * Math.tan(rad)) : roofType === "1" ? Math.round(B * Math.tan(rad)) : 0;
+  const has = (spec, code) => String(spec || "").split("+").map((x) => x.trim()).includes(code) || (spec === "торцы" && (code === "1" || code === String(nb + 1)));
+  const longWall = (code, title) => ({ code, title, kind: "ext", base: q.base, x0: -off, x1: L + off, height: H + (roofType === "1" && code === "Б" ? rise : 0),
+    axes: lenAxes.map((a) => ({ ...a })), columns: [...lenCols], posts: [], openings: [] });
+  const endWall = (code, title) => ({ code, title, kind: "ext", base: q.base, x0: -(off - t), x1: B + (off - t), height: H,
+    axes: [{ x: 0, name: "А" }, { x: B, name: "Б" }], columns: [0, B], posts: [...fwPosts], openings: [],
+    gable: rise ? { rise, type: roofType } : undefined });
+  const A = longWall("А", "Фасад по оси А"), Bw = longWall("Б", "Фасад по оси Б");
+  const E1 = endWall("1", "Торец по оси 1"), E2 = endWall(String(nb + 1), `Торец по оси ${nb + 1}`);
+  const used = { "А": new Set(), "Б": new Set() };
+  const addOp = (w, type, x0, x1, y0, y1, label, frame = true) => {
+    w.openings.push({ type, x0: Math.round(x0), x1: Math.round(x1), y0: Math.round(y0), y1: Math.round(y1), label });
+    if (frame) w.posts.push(Math.round(x0), Math.round(x1));
+  };
+  const spread = (n, bays) => { const r = []; for (let i = 0; i < n; i++) r.push(Math.min(bays - 1, Math.floor(((i + 0.5) * bays) / n))); return [...new Set(r)]; };
+  // ворота
+  const gW = q.gateW, gH = q.gateH;
+  for (const w of [A, Bw]) if (q.gatesN > 0 && has(q.gateWall, w.code)) {
+    if (gW > st - 400) notes.push(`Ворота ${gW} мм шире пролёта ${Math.round(st)} мм минус стойки — проверьте размещение`);
+    const bays = spread(Math.min(q.gatesN, nb), nb);
+    for (const b of bays) { const c = (b + 0.5) * st; addOp(w, "Ворота", c - gW / 2, c + gW / 2, 0, gH, `Ворота ${gW}×${gH}`); used[w.code].add(b); }
+  }
+  for (const w of [E1, E2]) if (q.gatesN > 0 && has(q.gateWall, w.code)) {
+    const n = Math.min(q.gatesN, 2);
+    for (let i = 0; i < n; i++) { const c = ((i + 0.5) * B) / n; addOp(w, "Ворота", c - gW / 2, c + gW / 2, 0, gH, `Ворота ${gW}×${gH}`); }
+    w.posts = w.posts.filter((p) => !w.openings.some((o) => p > o.x0 + 1 && p < o.x1 - 1));
+  }
+  // двери
+  let dleft = q.doorsN;
+  for (const w of [A, Bw, E1, E2]) {
+    if (dleft <= 0 || !has(q.doorWall, w.code)) continue;
+    if (w === A || w === Bw) {
+      for (let b = 0; b < nb && dleft > 0; b++) {
+        if (used[w.code].has(b)) continue;
+        const x0 = b * st + 700; addOp(w, "Дверь", x0, x0 + q.doorW, 0, q.doorH, `Дверь ${q.doorW}×${q.doorH}`); used[w.code].add(b); dleft--;
+      }
+    } else {
+      const c = B - 700 - q.doorW; addOp(w, "Дверь", c, c + q.doorW, 0, q.doorH, `Дверь ${q.doorW}×${q.doorH}`); dleft--;
+    }
+  }
+  // окна
+  for (const w of [A, Bw]) if (q.winN > 0 && has(q.winWall, w.code)) {
+    const free = []; for (let b = 0; b < nb; b++) if (!used[w.code].has(b)) free.push(b);
+    const pick = spread(Math.min(q.winN, free.length), free.length).map((i) => free[i]);
+    for (const b of pick) { const c = (b + 0.5) * st; addOp(w, "Окно", c - q.winW / 2, c + q.winW / 2, q.winSill, q.winSill + q.winH, `Окно ${q.winW}×${q.winH}`); }
+    if (q.winN > free.length) notes.push(`Фасад ${w.code}: окон ${q.winN}, свободных пролётов ${free.length} — поставлено ${pick.length}`);
+  }
+  for (const w of [A, Bw, E1, E2]) { w.posts = uniqSort(w.posts.filter((p) => !w.columns.includes(p))); w.openings.sort((a, b) => a.x0 - b.x0); }
+  const roof = roofType === "none" ? null : {
+    length: L + 2 * off, slopes: roofType === "2" ? 2 : 1, slopeDeg: q.roofDeg, purlinStep: q.purlin,
+    slopeLength: Math.round((roofType === "2" ? B / 2 + off : B + 2 * off) / Math.cos(rad)) };
+  notes.push("Быстрый ввод: прямоугольное здание; обрамление ворот, дверей и окон принято предусмотренным в каркасе.");
+  if (rise) notes.push(`Фронтоны торцов: подъём ${rise} мм, панели режутся по уклону по месту.`);
+  return { walls: [A, Bw, E1, E2], roof, corners: 4, notes };
+}
+
+if (typeof module !== "undefined") module.exports = { compute, DEFAULTS, clone, buildQuick, QUICK_DEFAULTS };
+
+</script>
+<script>
+"use strict";
+const EXAMPLE_WALLS = [{"code":"А","title":"Фасад по оси А (1–7)","kind":"ext","base":0,"x0":-300,"x1":36300,"height":9000,"axes":[{"x":0,"name":"1"},{"x":6000,"name":"2"},{"x":12000,"name":"3"},{"x":18000,"name":"4"},{"x":24000,"name":"5"},{"x":30000,"name":"6"},{"x":36000,"name":"7"}],"columns":[0,6000,12000,18000,24000,30000,36000],"posts":[3690,5000,7000,11000,13000,17000,19000,23000,25000,29000,31000,35000],"openings":[{"type":"Дверь","x0":3690,"x1":5000,"y0":0,"y1":2100,"label":"ДО 21-13 (1310×2100)"},{"type":"Ворота","x0":7000,"x1":11000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":13000,"x1":17000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":19000,"x1":23000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":25000,"x1":29000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":31000,"x1":35000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Окно","x0":2100,"x1":35000,"y0":5000,"y1":6000,"label":"Витраж ленточный h=1000"}]},{"code":"Г","title":"Фасад по оси Г (7–1)","kind":"ext","base":0,"x0":-300,"x1":36300,"height":9000,"axes":[{"x":0,"name":"7"},{"x":6000,"name":"6"},{"x":12000,"name":"5"},{"x":18000,"name":"4"},{"x":24000,"name":"3"},{"x":30000,"name":"2"},{"x":36000,"name":"1"}],"columns":[0,6000,12000,18000,24000,30000,36000],"posts":[1000,5000,7000,11000,13000,17000,19000,23000,25000,29000],"openings":[{"type":"Ворота","x0":1000,"x1":5000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":7000,"x1":11000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":13000,"x1":17000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":19000,"x1":23000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Ворота","x0":25000,"x1":29000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"},{"type":"Дверь","x0":30900,"x1":31700,"y0":0,"y1":2100,"label":"ДГ 21-8 (800×2100)"},{"type":"Дверь","x0":34400,"x1":35200,"y0":0,"y1":2100,"label":"ДГ 21-8 (800×2100)"},{"type":"Окно","x0":500,"x1":35700,"y0":5000,"y1":6000,"label":"Витраж ленточный h=1000"}]},{"code":"1","title":"Фасад по оси 1 (Г–А)","kind":"ext","base":0,"x0":-200,"x1":30200,"height":9000,"axes":[{"x":0,"name":"Г"},{"x":10000,"name":"В"},{"x":20000,"name":"Б"},{"x":30000,"name":"А"}],"columns":[0,10000,20000,30000],"posts":[5000,15000,25000],"openings":[{"type":"Окно","x0":700,"x1":9050,"y0":5000,"y1":6000,"label":"Витраж h=1000"},{"type":"Окно","x0":14100,"x1":16150,"y0":5000,"y1":6000,"label":"Окно h=1000"},{"type":"Окно","x0":19050,"x1":27400,"y0":5000,"y1":6000,"label":"Витраж h=1000"},{"type":"Окно","x0":10400,"x1":12450,"y0":3000,"y1":4000,"label":"Окно (лестница)"},{"type":"Окно","x0":700,"x1":2750,"y0":2000,"y1":3000,"label":"Окно"},{"type":"Окно","x0":17950,"x1":20000,"y0":2000,"y1":3000,"label":"Окно"},{"type":"Окно","x0":21700,"x1":23750,"y0":2000,"y1":3000,"label":"Окно"},{"type":"Окно","x0":25400,"x1":27450,"y0":2000,"y1":3000,"label":"Окно"},{"type":"Дверь","x0":15300,"x1":16300,"y0":0,"y1":2100,"label":"Дверь 1000×2100"}]},{"code":"7","title":"Фасад по оси 7 (А–Г)","kind":"ext","base":0,"x0":-200,"x1":30200,"height":9000,"axes":[{"x":0,"name":"А"},{"x":10000,"name":"Б"},{"x":20000,"name":"В"},{"x":30000,"name":"Г"}],"columns":[0,10000,20000,30000],"posts":[5000,15000,25000],"openings":[{"type":"Окно","x0":550,"x1":29500,"y0":5000,"y1":6000,"label":"Витраж ленточный h=1000"}]},{"code":"П2","title":"Перегородка по оси 2 (Г–А)","kind":"part","base":0,"x0":-200,"x1":30200,"height":8000,"axes":[{"x":0,"name":"Г"},{"x":10000,"name":"В"},{"x":20000,"name":"Б"},{"x":30000,"name":"А"}],"columns":[0,10000,20000,30000],"posts":[5000,25000],"openings":[{"type":"Дверь","x0":15100,"x1":16410,"y0":0,"y1":2100,"label":"ДО 21-13 (1310×2100)"}]},{"code":"ПГ1","title":"Теплогенераторная","kind":"part","base":0,"x0":0,"x1":4400,"height":3600,"axes":[],"columns":[0,4400],"posts":[],"openings":[]},{"code":"ПГ2","title":"Теплогенераторная","kind":"part","base":0,"x0":0,"x1":3900,"height":3600,"axes":[],"columns":[0,3900],"posts":[],"openings":[]},{"code":"ПГ3","title":"Лестница","kind":"part","base":0,"x0":0,"x1":3150,"height":3600,"axes":[],"columns":[0,3150],"posts":[],"openings":[]},{"code":"ПГ4","title":"Лестница","kind":"part","base":0,"x0":0,"x1":4600,"height":3600,"axes":[],"columns":[0,4600],"posts":[],"openings":[]},{"code":"ПГ5","title":"Коридор","kind":"part","base":0,"x0":0,"x1":3500,"height":3600,"axes":[],"columns":[0,3500],"posts":[],"openings":[]},{"code":"ПГ6","title":"Санузлы","kind":"part","base":0,"x0":0,"x1":3050,"height":3600,"axes":[],"columns":[0,3050],"posts":[],"openings":[]},{"code":"ПГ7","title":"Санузлы","kind":"part","base":0,"x0":0,"x1":1750,"height":3600,"axes":[],"columns":[0,1750],"posts":[],"openings":[]},{"code":"ПГ8","title":"Санузлы","kind":"part","base":0,"x0":0,"x1":1250,"height":3600,"axes":[],"columns":[0,1250],"posts":[],"openings":[]},{"code":"ПЭ1","title":"2 этаж: по оси В (офис 1 / лестница)","kind":"part","base":4200,"x0":0,"x1":6150,"height":3800,"axes":[],"columns":[0,6150],"posts":[],"openings":[]},{"code":"ПЭ2","title":"2 этаж: офис 2 / коридор","kind":"part","base":4200,"x0":0,"x1":6150,"height":3800,"axes":[],"columns":[0,6150],"posts":[],"openings":[{"type":"Дверь","x0":2575,"x1":3575,"y0":0,"y1":2100,"label":"Дверь 1000×2100"}]},{"code":"ПЭ3","title":"2 этаж: коридор / лестница","kind":"part","base":4200,"x0":0,"x1":3000,"height":3800,"axes":[],"columns":[0,3000],"posts":[],"openings":[]}];
+const EXAMPLE = {
+  name: "Пример: СТО, г. Пенза (шифр 03-06-26)",
+  walls: EXAMPLE_WALLS, roof: null, corners: 4,
+  params: { panel: { band: "3020", bandRows: 2, corner: "3020", outer: "7004", inner: "9003", partColor: "9003" } },
+  notes: ["Пример: геометрия снята с АР/КР 03-06-26, перегородки — по планам КР (±100 мм)."],
+};
+const RAL = {"1013":"#E3D9C6","1014":"#DDC49A","1015":"#E6D2B5","1018":"#F8F32B","2004":"#E25303","3003":"#9B111E","3005":"#5E2129","3009":"#6D342D","3011":"#792423","3020":"#BB1E10","3028":"#CC2C24","5002":"#20214F","5005":"#1E3B8C","5010":"#0E294B","5015":"#2271B3","5021":"#07737A","6002":"#2D572C","6005":"#0F4336","6018":"#57A639","6029":"#20603D","7004":"#9B9B9B","7005":"#6C6E6B","7016":"#383E42","7024":"#474A50","7026":"#2F3A3F","7035":"#CBD0CC","7047":"#D0D0D0","8004":"#8E402A","8017":"#45322E","9002":"#E7EBDA","9003":"#F4F4F4","9005":"#0A0A0A","9006":"#A5A5A5","9010":"#F7F9EF"};
+const ralHex = (c) => RAL[String(c).replace(/\D/g, "")] || "#B7BCC1";
+const lum = (hex) => { const n = parseInt(hex.slice(1), 16); const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (v, d = 0) => (v == null || isNaN(v) ? "—" : Number(v).toLocaleString("ru-RU", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const $ = (s, r = document) => r.querySelector(s);
+const cap = (name) => (window.claude && typeof window.claude.use === "function" ? Promise.resolve(window.claude.use(name)).catch(() => null) : Promise.resolve(null));
+const num = (v) => { const n = parseFloat(String(v).replace(/\s/g, "").replace(",", ".")); return isNaN(n) ? 0 : n; };
+const nums = (v) => String(v || "").split(/[;,\s]+/).map((x) => x.trim()).filter(Boolean).map(Number).filter((x) => !isNaN(x));
+function deepMerge(a, b) { for (const k of Object.keys(b || {})) { if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) { a[k] = a[k] || {}; deepMerge(a[k], b[k]); } else a[k] = b[k]; } return a; }
+
+/* ---------- состояние ---------- */
+const LS = "tsp-kit-v1";
+let S = { tab: "project", sel: 0, pages: [], busy: false, ai: window.claude ? "checking" : "no" };
+let PRJ = null, P = null, R = null;
+function loadState() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) { saved = null; }
+  if (saved && saved.project && saved.P) { PRJ = saved.project; P = deepMerge(clone(DEFAULTS), saved.P); }
+  else useExample();
+}
+function persist() { try { localStorage.setItem(LS, JSON.stringify({ project: PRJ, P })); } catch (e) {} }
+function useExample() { PRJ = clone(EXAMPLE); P = deepMerge(clone(DEFAULTS), EXAMPLE.params); delete PRJ.params; S.sel = 0; }
+function newProject() { PRJ = { name: "Новый объект", walls: [], roof: null, notes: [] }; P = clone(DEFAULTS); S.sel = 0; }
+
+let rt = null;
+function recalc(soft) {
+  try { R = compute(PRJ, P); } catch (e) { console.error(e); R = null; }
+  persist(); renderKpis();
+  if (!soft) renderTab();
+}
+function recalcSoon(fn) { clearTimeout(rt); rt = setTimeout(() => { recalc(true); fn && fn(); }, 120); }
+
+function toast(t) { const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => (el.hidden = true), 3500); }
+
+/* ---------- KPI ---------- */
+function renderKpis() {
+  const t = R ? R.totals : null;
+  const flags = R ? R.flags.length : 0;
+  const errs = R ? R.flags.filter((f) => f.lvl === "err").length : 0;
+  $("#kpis").innerHTML = t ? `
+    <div class="kpi"><div class="l">Панели к заказу</div><div class="v">${fmt(t.orderArea, 1)} м²</div><div class="s">${fmt(t.orderPcs)} шт. · ${fmt(t.positions)} поз.</div></div>
+    <div class="kpi"><div class="l">Отход</div><div class="v">${fmt(t.orderArea ? (t.waste / t.orderArea) * 100 : 0, 1)} %</div><div class="s">нетто ${fmt(t.netArea, 1)} м²</div></div>
+    <div class="kpi"><div class="l">Масса отгрузки</div><div class="v">${fmt(t.shipKg / 1000, 1)} т</div><div class="s">панели ${fmt(t.orderKg / 1000, 1)} т</div></div>
+    <div class="kpi"><div class="l">Пачки / поддоны</div><div class="v">${fmt(t.packs)} / ${fmt(t.pallets)}</div><div class="s">ФИ ${fmt(t.fiPcs)} шт.</div></div>
+    <div class="kpi hot"><div class="l">Машин</div><div class="v">${fmt(t.trucks)}</div><div class="s">${esc(P.truck.name)}</div></div>
+    <div class="kpi ${errs ? "bad" : ""}"><div class="l">Замечания</div><div class="v">${flags}</div><div class="s">${errs ? errs + " критичных" : "проверить"}</div></div>`
+    : `<div class="kpi"><div class="l">Расчёт</div><div class="v">—</div><div class="s">добавьте стены</div></div>`;
+  $("#projName").value = PRJ.name || "";
+}
+
+/* ---------- вкладки ---------- */
+const TABS = [["project", "1", "Проект"], ["geo", "2", "Геометрия"], ["rules", "3", "Нормы"], "|", ["layout", "", "Раскладка"], ["spec", "", "Спецификация"], ["packs", "", "Упаковка"], ["trucks", "", "Машины"], ["flags", "", "Замечания"]];
+function renderTabs() {
+  $("#tabs").innerHTML = TABS.map((t) => t === "|" ? `<span class="sep"></span>` :
+    `<button type="button" role="tab" data-tab="${t[0]}" aria-selected="${S.tab === t[0]}">${t[1] ? `<span class="n">${t[1]}</span>` : ""}${t[2]}${t[0] === "flags" && R && R.flags.length ? ` <span class="chip warn">${R.flags.length}</span>` : ""}</button>`).join("");
+}
+function renderTab() {
+  renderTabs();
+  const m = $("#main");
+  const f = { project: tabProject, geo: tabGeo, rules: tabRules, layout: tabLayout, spec: tabSpec, packs: tabPacks, trucks: tabTrucks, flags: tabFlags }[S.tab];
+  m.innerHTML = `<section class="tab">${f()}</section>`;
+  if (S.tab === "project") bindProject();
+  if (S.tab === "geo") bindGeo();
+  if (S.tab === "rules") bindRules();
+}
+$("#tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (!b) return; S.tab = b.dataset.tab; try { location.hash = S.tab; } catch (er) {} renderTab(); });
+
+/* =================== 1. ПРОЕКТ =================== */
+const QF = [
+  ["L", "Длина здания по осям, м", "num"], ["B", "Ширина (пролёт), м", "num"], ["H", "Высота стен, м", "num"], ["step", "Шаг колонн по длине, м", "num"],
+  ["fw", "Шаг стоек фахверка на торцах, м", "num"], ["off", "Вынос обшивки за ось, мм", "num"], ["base", "Отметка низа панелей, мм", "num"],
+  ["gatesN", "Ворот, шт.", "num"], ["gateW", "Ширина ворот, мм", "num"], ["gateH", "Высота ворот, мм", "num"], ["gateWall", "Ворота на фасаде", "wall"],
+  ["doorsN", "Дверей, шт.", "num"], ["doorW", "Ширина двери, мм", "num"], ["doorH", "Высота двери, мм", "num"], ["doorWall", "Двери на фасаде", "wall"],
+  ["winN", "Окон на фасад, шт.", "num"], ["winW", "Ширина окна, мм", "num"], ["winH", "Высота окна, мм", "num"], ["winSill", "Низ окна от низа панелей, мм", "num"], ["winWall", "Окна на фасадах", "wall"],
+  ["roof", "Кровля", "roof"], ["roofDeg", "Уклон кровли, °", "num"], ["purlin", "Шаг прогонов, мм", "num"],
+];
+function quickCard() {
+  const q = { ...QUICK_DEFAULTS, ...(PRJ.quick || {}) };
+  const walls = [["А", "А (длинный)"], ["Б", "Б (длинный)"], ["А+Б", "А и Б"], ["торцы", "оба торца"], ["1", "торец 1"]];
+  return `<div class="card">
+    <h2>Быстрый ввод здания</h2>
+    <p class="hint" style="margin:-4px 0 12px">Прямоугольное здание на металлокаркасе: введите основные размеры — стены, проёмы и кровля построятся сами. Потом их можно поправить на вкладке «Геометрия».</p>
+    <div class="form">${QF.map(([k, l, t]) => {
+      if (t === "wall") return `<label>${l}<select data-q="${k}">${walls.map(([v, n]) => `<option value="${v}" ${q[k] === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>`;
+      if (t === "roof") return `<label>${l}<select data-q="${k}">${[["none", "не из ТСП (парапет)"], ["2", "ТСП, двускатная"], ["1", "ТСП, односкатная"]].map(([v, n]) => `<option value="${v}" ${q[k] === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>`;
+      return `<label>${l}<input type="number" step="any" data-q="${k}" value="${q[k]}"></label>`;
+    }).join("")}</div>
+    <div class="row" style="margin-top:14px"><button type="button" class="primary" id="btnQuick">Построить и рассчитать</button><span class="hint">Заменит текущие стены и кровлю. Тип панели, цвета и машина — на вкладке «Нормы».</span></div>
+  </div>`;
+}
+function tabProject() {
+  const sel = S.pages.filter((p) => p.checked).length;
+  if (S.ai !== "yes") return `
+  <div class="grid2">
+    ${quickCard()}
+    <div class="card">
+      <h2>Как пользоваться</h2>
+      <ol class="steps">
+        <li><b>Размеры.</b> Заполните «Быстрый ввод» и нажмите «Построить и рассчитать». Сложное здание или перегородки — добавьте и поправьте на вкладке «Геометрия».</li>
+        <li><b>Нормы.</b> Тип и толщина панели, цвета, правила пачек и машина. По умолчанию — каталог «Металл Профиль», еврофура 13,6 м / 20 т.</li>
+        <li><b>Результат.</b> Раскладка с марками, спецификация (панели, фасонка, крепёж, герметики), ведомость пачек и схема загрузки машин. Кнопки «Excel» и «Отчёт» вверху сохраняют результат.</li>
+      </ol>
+      <div class="row" style="margin-top:14px"><button type="button" id="btnExample">Открыть пример (СТО, Пенза)</button><button type="button" id="btnNew">Пустой проект</button></div>
+      <p class="hint" style="margin-top:12px">${S.ai === "checking" ? `<span class="spin"></span> Проверяю, доступно ли распознавание чертежей…` : "Распознавание PDF-чертежей работает только при открытии этой страницы в Claude. Весь расчёт работает и без него."}</p>
+      ${PRJ.notes && PRJ.notes.length ? `<h3 style="margin-top:14px">Заметки</h3><ul class="small">${PRJ.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
+    </div>
+  </div>`;
+  return `
+  <div class="grid2">
+    <div class="card">
+      <h2>Загрузка проекта</h2>
+      <div class="drop" id="drop">
+        <b>Перетащите сюда PDF или картинки листов</b>
+        <div class="muted small" style="margin:6px 0 12px">АР и КР: фасады, планы каркаса, развертки по осям, разрезы. Файлы обрабатываются в браузере.</div>
+        <button type="button" class="primary" id="btnPick">Выбрать файлы</button>
+        <input id="filePick" type="file" accept=".pdf,image/png,image/jpeg,image/webp" multiple hidden>
+      </div>
+      ${S.pages.length ? `
+      <div class="row" style="margin-top:12px;justify-content:space-between">
+        <div class="small muted">Листов: ${S.pages.length}, выбрано для распознавания: <b>${sel}</b>. Отметьте фасады, планы и развертки.</div>
+        <div class="row"><button type="button" class="small" id="selNone">Снять все</button><button type="button" class="small" id="selAll">Выбрать все</button><button type="button" class="small danger" id="clrPages">Очистить</button></div>
+      </div>
+      <div class="thumbs">${S.pages.map((p, i) => `<label class="thumb ${p.checked ? "on" : ""}"><input type="checkbox" data-pg="${i}" ${p.checked ? "checked" : ""}><img src="${p.thumb}" alt="${esc(p.name)} лист ${p.page}"><div class="cap">${esc(p.name)} · л.${p.page}${p.hint ? " · " + esc(p.hint) : ""}</div></label>`).join("")}</div>` : ""}
+      <div class="row" style="margin-top:14px">
+        <button type="button" class="primary" id="btnRecog" ${!sel || S.busy ? "disabled" : ""}>${S.busy ? `<span class="spin"></span> Распознаю…` : "Распознать выбранные листы"}</button>
+        ${S.busy ? `<button type="button" id="btnStop">Остановить</button>` : ""}
+        <label class="row small muted" style="gap:6px"><input type="checkbox" id="recMerge" ${S.merge !== false ? "checked" : ""}> добавить к текущим стенам</label>
+      </div>
+      <div id="recStatus" style="margin-top:10px">${S.status ? `<div class="status ${S.statusCls || ""}">${esc(S.status)}</div>` : ""}</div>
+    </div>
+    <div class="card">
+      <h2>Как это работает</h2>
+      <ol class="steps">
+        <li><b>Распознавание.</b> Claude читает отмеченные листы и текстовый слой PDF и возвращает геометрию: стены, оси, колонны, стойки, проёмы, кровлю.</li>
+        <li><b>Проверка.</b> На вкладке «Геометрия» сверьте размеры с чертежом и поправьте их: распознавание ошибается на мелких размерах.</li>
+        <li><b>Нормы.</b> Тип панели, цвета, правила пачек и машины. По умолчанию — каталог «Металл Профиль», еврофура 13,6 м / 20 т.</li>
+        <li><b>Результат.</b> Раскладка с марками, спецификация (панели, фасонка, крепёж, герметики), ведомость пачек и схема загрузки машин. Выгрузка в Excel и отчёт.</li>
+      </ol>
+      <div class="row" style="margin-top:14px">
+        <button type="button" id="btnExample">Открыть пример (СТО, Пенза)</button>
+        <button type="button" id="btnNew">Новый пустой проект</button>
+      </div>
+      <p class="hint" style="margin-top:12px">Распознавание расходует лимит вашего аккаунта Claude, при первом запуске появится запрос разрешения. Без распознавания геометрию можно ввести вручную на вкладке «Геометрия».</p>
+      ${PRJ.notes && PRJ.notes.length ? `<h3 style="margin-top:14px">Заметки распознавания</h3><ul class="small">${PRJ.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
+    </div>
+  </div>
+  ${quickCard()}`;
+}
+
+async function addFiles(files) {
+  for (const f of files) {
+    if (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) {
+      if (!window.pdfjsLib) { toast("Библиотека PDF не загрузилась — загрузите листы картинками"); continue; }
+      try {
+        const buf = await f.arrayBuffer();
+        const doc = await pdfjsLib.getDocument({ data: buf, isEvalSupported: false }).promise;
+        for (let i = 1; i <= doc.numPages; i++) {
+          const page = await doc.getPage(i);
+          const vp = page.getViewport({ scale: 1 });
+          const sc = 260 / Math.max(vp.width, vp.height);
+          const c = document.createElement("canvas"); const v = page.getViewport({ scale: sc });
+          c.width = v.width; c.height = v.height;
+          await page.render({ canvasContext: c.getContext("2d"), viewport: v }).promise;
+          let text = "";
+          try { const tc = await page.getTextContent(); text = tc.items.map((it) => it.str).join(" ").replace(/\s+/g, " ").trim(); } catch (e) {}
+          const hint = /фасад/i.test(text) ? "фасад" : /развертк|развёртк/i.test(text) ? "развертка" : /план\s+каркас|план\s+на\s+отм|план\s+кровли/i.test(text) ? "план" : /разрез/i.test(text) ? "разрез" : "";
+          S.pages.push({ name: f.name, page: i, doc, thumb: c.toDataURL("image/jpeg", 0.7), text, hint, checked: !!hint && !/кровли/i.test(hint) });
+          if (S.tab === "project" && i % 4 === 0) renderTab();
+        }
+      } catch (e) { console.error(e); toast("Не удалось открыть " + f.name); }
+    } else if (/^image\//.test(f.type)) {
+      S.pages.push({ name: f.name, page: 1, file: f, thumb: URL.createObjectURL(f), text: "", hint: "", checked: true });
+    }
+  }
+  if (!S.pages.some((p) => p.checked)) S.pages.forEach((p) => (p.checked = true));
+  renderTab();
+}
+async function pageBlob(p) {
+  if (p.file) return p.file;
+  const page = await p.doc.getPage(p.page);
+  const vp = page.getViewport({ scale: 1 });
+  const sc = 2000 / Math.max(vp.width, vp.height);
+  const v = page.getViewport({ scale: sc });
+  const c = document.createElement("canvas"); c.width = v.width; c.height = v.height;
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext: ctx, viewport: v }).promise;
+  return await new Promise((res) => c.toBlob(res, "image/jpeg", 0.88));
+}
+
+const RECOG_PROMPT = `Ты — инженер по ограждающим конструкциям из трёхслойных сэндвич-панелей на металлокаркасе. На изображениях — листы проекта (АР/КР): фасады, планы, разрезы, развертки каркаса по осям. Ниже дан текстовый слой PDF этих листов (размеры, отметки, подписи).
+Задача: извлечь геометрию для раскладки сэндвич-панелей — все наружные стены и внутренние перегородки ИЗ СЭНДВИЧ-ПАНЕЛЕЙ (не из блоков, кирпича, ГКЛ), и кровлю, если она из сэндвич-панелей.
+
+Система координат (всё в мм, целые числа):
+- Каждая стена — в своём виде, как на фасаде/развертке; наружные стены — вид снаружи здания.
+- x — вдоль стены слева направо по виду. x=0 — первая (левая) ось на этом виде. x0, x1 — левая и правая границы обшивки (наружные грани); для наружных стен они обычно выходят за крайние оси на привязку, например x0=-300, x1=L+300.
+- y — вверх от низа панелей. base — отметка низа панелей в мм (обычно 0). height — высота обшивки от низа до верха (верх парапета или карниза).
+- axes — оси на виде: [{"x":0,"name":"1"},...]. columns — x всех колонн каркаса на этой стене. posts — x стоек фахверка и стоек обрамления проёмов, если они показаны в КР.
+- openings — все проёмы: {"type":"Ворота"|"Дверь"|"Окно"|"Витраж","x0","x1","y0","y1","label"}; y — от низа панелей; ленточное остекление — один проём.
+- kind: "ext" — наружная стена, "part" — перегородка из сэндвич-панелей.
+- code — короткий код: фасад по оси А → "А", по оси 1 → "1"; перегородка — "П" + ось или номер ("П2"). title — понятное название.
+Кровля: roof = {"length": длина вдоль здания, "slopeLength": длина ската по уклону от наружной грани стены до конька, "slopes": 1 или 2, "slopeDeg": уклон в градусах, "purlinStep": шаг прогонов} — только если кровля из сэндвич-панелей, иначе null.
+Если развертки нет, вычисли привязки проёмов по плану и фасаду. Не выдумывай: если размер не читается, оцени по масштабу и запиши в notes, что оценено. Расхождения между листами — тоже в notes (коротко).
+Если указано, извлеки panel: {"thickness","width","core":"МВ"|"ППС"|"PIR","outer":"RAL без слова RAL","inner","orient":"horizontal"|"vertical"}.
+Ответь ТОЛЬКО одним JSON:
+{"object":"название объекта / шифр","panel":{},"walls":[{"code":"А","title":"Фасад по оси А (1–7)","kind":"ext","base":0,"x0":-300,"x1":36300,"height":9000,"axes":[{"x":0,"name":"1"},{"x":6000,"name":"2"}],"columns":[0,6000],"posts":[],"openings":[{"type":"Ворота","x0":7000,"x1":11000,"y0":0,"y1":4400,"label":"Ворота 4000×4400"}]}],"roof":null,"notes":["..."]}`;
+
+let recCtl = null;
+async function recognize() {
+  const sample = await cap("sample");
+  if (!sample) { setStatus("Распознавание недоступно в этом просмотре. Откройте страницу в Claude или введите геометрию вручную на вкладке «Геометрия».", "err"); return; }
+  const lim = await sample.limits().catch(() => null);
+  const maxN = Math.min(6, lim?.images?.maxCount || 0);
+  if (!maxN) { setStatus("Этот просмотр не может отправлять изображения в Claude. Введите геометрию вручную на вкладке «Геометрия».", "err"); return; }
+  const pages = S.pages.filter((p) => p.checked);
+  const batches = []; for (let i = 0; i < pages.length; i += maxN) batches.push(pages.slice(i, i + maxN));
+  S.busy = true; recCtl = new AbortController(); renderTab();
+  const merge = $("#recMerge") ? $("#recMerge").checked : true; S.merge = merge;
+  let found = merge ? clone(PRJ.walls) : [], roof = merge ? PRJ.roof : null, notes = merge ? [...(PRJ.notes || [])] : [], obj = "", panel = {};
+  try {
+    for (let bi = 0; bi < batches.length; bi++) {
+      const b = batches[bi];
+      setStatus(`Пакет ${bi + 1} из ${batches.length}: готовлю ${b.length} лист(ов)…`);
+      const imgs = [];
+      for (const p of b) imgs.push(await pageBlob(p));
+      const text = b.map((p, i) => `--- Изображение ${i + 1}: ${p.name}, лист ${p.page} ---\n${(p.text || "(текстового слоя нет)").slice(0, 6000)}`).join("\n\n");
+      const known = found.length ? `\nУже найдены стены (коды): ${found.map((w) => w.code).join(", ")}. Если на этих листах есть та же стена с более полными данными — верни её снова с тем же code; новые стены добавь.\n` : "";
+      setStatus(`Пакет ${bi + 1} из ${batches.length}: Claude читает чертежи… (обычно 1–3 минуты)`);
+      let chars = 0;
+      const data = await sample.json(RECOG_PROMPT + known + "\n\nТЕКСТОВЫЙ СЛОЙ:\n" + text, {
+        images: imgs, modelTier: "complex", signal: recCtl.signal,
+        onText: ({ text }) => { if (text.length - chars > 400) { chars = text.length; setStatus(`Пакет ${bi + 1} из ${batches.length}: получено ${fmt(text.length)} символов ответа…`); } },
+      });
+      if (data && Array.isArray(data.walls)) {
+        for (const w of data.walls) {
+          const nw = normWall(w);
+          const i = found.findIndex((x) => x.code === nw.code);
+          if (i < 0) found.push(nw);
+          else if ((nw.openings.length + nw.columns.length + nw.posts.length) >= (found[i].openings.length + found[i].columns.length + found[i].posts.length)) found[i] = nw;
+        }
+      }
+      if (data && data.roof && data.roof.length) roof = { length: num(data.roof.length), slopeLength: num(data.roof.slopeLength), slopes: num(data.roof.slopes) || 1, slopeDeg: data.roof.slopeDeg != null ? num(data.roof.slopeDeg) : null, purlinStep: num(data.roof.purlinStep) || 1500 };
+      if (data && Array.isArray(data.notes)) notes.push(...data.notes.map(String));
+      if (data && data.object) obj = String(data.object);
+      if (data && data.panel && typeof data.panel === "object") Object.assign(panel, data.panel);
+    }
+    PRJ.walls = found; PRJ.roof = roof; PRJ.notes = [...new Set(notes)];
+    if (obj && (!PRJ.name || /^Пример|^Новый/.test(PRJ.name))) PRJ.name = obj;
+    applyPanelHints(panel);
+    S.sel = 0; S.busy = false;
+    setStatus(`Готово: стен ${found.length}${roof ? ", кровля из ТСП" : ""}. Проверьте размеры на вкладке «Геометрия».`, "ok");
+    recalc();
+  } catch (e) {
+    S.busy = false;
+    const msg = { cancelled: "Остановлено.", not_granted: "Доступ к Claude не разрешён для этой страницы.", rate_limited: "Слишком много запросов или исчерпан лимит — попробуйте позже.", invalid_json: "Ответ не удалось разобрать. Попробуйте ещё раз или выберите меньше листов.", image_rejected: "Один из листов не принят — попробуйте другой файл.", prompt_too_large: "Слишком много текста — выберите меньше листов." }[e && e.code] || "Ошибка распознавания: " + (e && (e.message || e.code) || e);
+    if (found.length && found !== PRJ.walls && merge === false) {}
+    setStatus(msg, e && e.code === "cancelled" ? "" : "err");
+    renderTab();
+  }
+}
+function applyPanelHints(p) {
+  if (!p) return;
+  if (p.thickness) P.panel.thickness = num(p.thickness);
+  if (p.width) P.panel.width = num(p.width);
+  if (p.core && /МВ|ППС|PIR/.test(p.core)) P.panel.core = p.core;
+  if (p.outer) P.panel.outer = String(p.outer).replace(/\D/g, "") || P.panel.outer;
+  if (p.inner) P.panel.inner = String(p.inner).replace(/\D/g, "") || P.panel.inner;
+  if (p.orient === "vertical" || p.orient === "horizontal") P.panel.orient = p.orient;
+}
+function normWall(w) {
+  const o = (w.openings || []).map((x) => ({ type: String(x.type || "Окно"), x0: num(x.x0), x1: num(x.x1), y0: num(x.y0), y1: num(x.y1), label: String(x.label || "") })).filter((x) => x.x1 > x.x0 && x.y1 > x.y0);
+  return { code: String(w.code || "?"), title: String(w.title || "Стена " + (w.code || "")), kind: w.kind === "part" ? "part" : "ext", base: num(w.base), x0: num(w.x0), x1: num(w.x1), height: num(w.height),
+           axes: (w.axes || []).map((a) => ({ x: num(a.x), name: String(a.name) })), columns: (w.columns || []).map(num), posts: (w.posts || []).map(num), openings: o };
+}
+function setStatus(t, cls) { S.status = t; S.statusCls = cls || ""; const el = $("#recStatus"); if (el) el.innerHTML = `<div class="status ${cls || ""}">${esc(t)}</div>`; }
+
+function bindProject() {
+  const drop = $("#drop"), pick = $("#filePick");
+  if (drop && pick) {
+    $("#btnPick").onclick = () => pick.click();
+    pick.onchange = () => { addFiles([...pick.files]); pick.value = ""; };
+    drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+    drop.ondragleave = () => drop.classList.remove("over");
+    drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); addFiles([...e.dataTransfer.files]); };
+  }
+  $("#main").querySelectorAll("[data-q]").forEach((el) => (el.onchange = () => {
+    PRJ.quick = { ...QUICK_DEFAULTS, ...(PRJ.quick || {}) };
+    PRJ.quick[el.dataset.q] = el.type === "number" ? num(el.value) : el.value; persist();
+  }));
+  const bq = $("#btnQuick"); if (bq) bq.onclick = () => {
+    const q = { ...QUICK_DEFAULTS, ...(PRJ.quick || {}) };
+    if (!(q.L > 0 && q.B > 0 && q.H > 0)) { toast("Заполните длину, ширину и высоту"); return; }
+    const g = buildQuick(q, P);
+    PRJ.walls = g.walls; PRJ.roof = g.roof; PRJ.corners = g.corners; PRJ.notes = g.notes; PRJ.quick = q;
+    if (!PRJ.name || /^Пример|^Новый|^Здание /.test(PRJ.name)) PRJ.name = `Здание ${q.L}×${q.B}×${q.H} м`;
+    S.sel = 0; S.tab = "layout"; recalc(); window.scrollTo(0, 0); toast("Стены построены — проверьте раскладку");
+  };
+  $("#main").querySelectorAll("input[data-pg]").forEach((c) => (c.onchange = () => { S.pages[+c.dataset.pg].checked = c.checked; renderTab(); }));
+  const b = (id, f) => { const el = $(id); if (el) el.onclick = f; };
+  b("#selAll", () => { S.pages.forEach((p) => (p.checked = true)); renderTab(); });
+  b("#selNone", () => { S.pages.forEach((p) => (p.checked = false)); renderTab(); });
+  b("#clrPages", () => { S.pages = []; S.status = ""; renderTab(); });
+  b("#btnRecog", recognize);
+  b("#btnStop", () => recCtl && recCtl.abort());
+  b("#btnExample", () => { useExample(); S.status = ""; recalc(); toast("Открыт пример"); });
+  b("#btnNew", () => { newProject(); recalc(); S.tab = "geo"; renderTab(); });
+  const m = $("#recMerge"); if (m) m.onchange = () => (S.merge = m.checked);
+}
+
+/* =================== 2. ГЕОМЕТРИЯ =================== */
+function wallSummary(w) {
+  const L = w.x1 - w.x0;
+  return `${fmt(L / 1000, 2)} × ${fmt(w.height / 1000, 2)} м · проёмов ${w.openings.length}`;
+}
+function tabGeo() {
+  const W = PRJ.walls; const w = W[S.sel];
+  const rw = R && w ? R.walls.find((x) => x.code === w.code) : null;
+  const rf = PRJ.roof;
+  return `
+  <div class="grid-geo">
+    <div class="card" style="padding:12px">
+      <div class="ptitle"><h3 style="margin:0">Стены (${W.length})</h3></div>
+      <div class="wlist" style="margin-top:10px">${W.map((x, i) => `<button type="button" class="witem" data-sel="${i}" aria-current="${i === S.sel}"><span class="code">${esc(x.code)}</span><span class="t">${esc(x.title)}</span><span class="d"><span class="chip ${x.kind}">${x.kind === "part" ? "перегородка" : "наружная"}</span> ${wallSummary(x)}</span></button>`).join("") || `<div class="empty small">Стен нет. Распознайте проект или добавьте вручную.</div>`}</div>
+      <div class="row" style="margin-top:10px"><button type="button" class="small" id="addExt">+ Наружная стена</button><button type="button" class="small" id="addPart">+ Перегородка</button></div>
+      <div style="margin-top:16px;border-top:1px solid var(--line2);padding-top:12px">
+        <label class="row" style="gap:8px"><input type="checkbox" id="roofOn" ${rf ? "checked" : ""}> <b>Кровля из сэндвич-панелей</b></label>
+        ${rf ? `<div class="form" style="margin-top:10px;grid-template-columns:1fr 1fr">
+          <label>Длина вдоль здания, мм<input type="number" data-roof="length" value="${rf.length}"></label>
+          <label>Длина ската, мм<input type="number" data-roof="slopeLength" value="${rf.slopeLength}"></label>
+          <label>Скатов<select data-roof="slopes"><option ${rf.slopes == 1 ? "selected" : ""}>1</option><option ${rf.slopes == 2 ? "selected" : ""}>2</option></select></label>
+          <label>Уклон, °<input type="number" step="0.1" data-roof="slopeDeg" value="${rf.slopeDeg ?? ""}"></label>
+          <label>Шаг прогонов, мм<input type="number" data-roof="purlinStep" value="${rf.purlinStep}"></label>
+          <label>Углов здания<input type="number" id="corners" value="${PRJ.corners ?? 4}"></label></div>` : `<label class="field" style="margin-top:10px;max-width:140px">Углов здания<input type="number" id="corners" value="${PRJ.corners ?? 4}"></label>`}
+      </div>
+    </div>
+    <div class="card">
+      ${w ? `
+      <div class="ptitle"><h2 style="margin:0">${esc(w.code)} — ${esc(w.title)}</h2><div class="row"><button type="button" class="small" id="dupWall">Дублировать</button><button type="button" class="small danger" id="delWall">Удалить стену</button></div></div>
+      <div class="form" style="margin-top:12px">
+        <label>Код<input type="text" data-f="code" value="${esc(w.code)}"></label>
+        <label class="wide">Название<input type="text" data-f="title" value="${esc(w.title)}"></label>
+        <label>Тип<select data-f="kind"><option value="ext" ${w.kind === "ext" ? "selected" : ""}>наружная</option><option value="part" ${w.kind === "part" ? "selected" : ""}>перегородка</option></select></label>
+        <label>Низ панелей (отм.), мм<input type="number" data-f="base" value="${w.base}"></label>
+        <label>Начало x0, мм<input type="number" data-f="x0" value="${w.x0}"></label>
+        <label>Конец x1, мм<input type="number" data-f="x1" value="${w.x1}"></label>
+        <label>Высота обшивки, мм<input type="number" data-f="height" value="${w.height}"></label>
+        <label class="wide">Колонны, x через запятую<input type="text" data-f="columns" value="${w.columns.join(", ")}"></label>
+        <label class="wide">Стойки фахверка / обрамления, x<input type="text" data-f="posts" value="${w.posts.join(", ")}"></label>
+        <label class="wide">Оси (x:имя)<input type="text" data-f="axes" value="${w.axes.map((a) => a.x + ":" + a.name).join(", ")}"></label>
+        <label>Фронтон: подъём, мм<input type="number" data-f="gRise" value="${w.gable ? w.gable.rise : 0}"></label>
+        <label>Фронтон: форма<select data-f="gType"><option value="2" ${!w.gable || w.gable.type !== "1" ? "selected" : ""}>двускатный</option><option value="1" ${w.gable && w.gable.type === "1" ? "selected" : ""}>односкатный</option></select></label>
+      </div>
+      <h3 style="margin-top:16px">Проёмы</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>Тип</th><th class="n">x0</th><th class="n">x1</th><th class="n">y0 (низ)</th><th class="n">y1 (верх)</th><th class="n">Размер</th><th>Подпись</th><th></th></tr></thead><tbody>
+        ${w.openings.map((o, i) => `<tr><td><select data-o="${i}" data-k="type">${["Ворота", "Дверь", "Окно", "Витраж"].map((t) => `<option ${o.type === t ? "selected" : ""}>${t}</option>`).join("")}</select></td>
+          ${["x0", "x1", "y0", "y1"].map((k) => `<td><input type="number" data-o="${i}" data-k="${k}" value="${o[k]}" style="width:86px"></td>`).join("")}
+          <td class="n">${o.x1 - o.x0}×${o.y1 - o.y0}</td><td><input type="text" data-o="${i}" data-k="label" value="${esc(o.label)}"></td><td><button type="button" class="small danger" data-delo="${i}" aria-label="Удалить проём">✕</button></td></tr>`).join("") || `<tr><td colspan="8" class="muted">Проёмов нет</td></tr>`}
+      </tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" class="small" id="addOp">+ Проём</button><span class="hint">x — от левой оси вида, y — от низа панелей. Все размеры в мм.</span></div>
+      <h3 style="margin-top:16px">Предпросмотр раскладки</h3>
+      <div class="svgbox" id="geoPrev">${rw ? wallSVG(rw) : `<div class="empty">Заполните длину и высоту</div>`}</div>
+      ${legendHTML()}
+      ` : `<div class="empty">Выберите или добавьте стену</div>`}
+    </div>
+  </div>`;
+}
+function bindGeo() {
+  const main = $("#main");
+  main.querySelectorAll("[data-sel]").forEach((b) => (b.onclick = () => { S.sel = +b.dataset.sel; renderTab(); }));
+  const w = PRJ.walls[S.sel];
+  const upd = () => recalcSoon(() => {
+    const rw = R && w ? R.walls.find((x) => x.code === w.code) : null;
+    const pv = $("#geoPrev"); if (pv) pv.innerHTML = rw ? wallSVG(rw) : `<div class="empty">Заполните длину и высоту</div>`;
+    const it = main.querySelector(`[data-sel="${S.sel}"]`); if (it && w) { it.querySelector(".t").textContent = w.title; it.querySelector(".code").textContent = w.code; it.querySelector(".d").innerHTML = `<span class="chip ${w.kind}">${w.kind === "part" ? "перегородка" : "наружная"}</span> ${wallSummary(w)}`; }
+    renderTabs();
+  });
+  main.querySelectorAll("[data-f]").forEach((el) => (el.onchange = () => {
+    const f = el.dataset.f;
+    if (f === "columns" || f === "posts") w[f] = nums(el.value);
+    else if (f === "axes") w.axes = el.value.split(/[;,]+/).map((s) => s.trim()).filter(Boolean).map((s) => { const [x, n] = s.split(":"); return { x: num(x), name: (n || "").trim() }; });
+    else if (["base", "x0", "x1", "height"].includes(f)) w[f] = num(el.value);
+    else if (f === "gRise") { const r = num(el.value); w.gable = r > 0 ? { rise: r, type: (w.gable && w.gable.type) || "2" } : undefined; }
+    else if (f === "gType") { if (w.gable) w.gable.type = el.value; }
+    else w[f] = el.value;
+    upd();
+  }));
+  main.querySelectorAll("[data-o]").forEach((el) => (el.onchange = () => {
+    const o = w.openings[+el.dataset.o]; const k = el.dataset.k;
+    o[k] = ["x0", "x1", "y0", "y1"].includes(k) ? num(el.value) : el.value;
+    const td = el.closest("tr").children[5]; if (td) td.textContent = `${o.x1 - o.x0}×${o.y1 - o.y0}`;
+    upd();
+  }));
+  main.querySelectorAll("[data-delo]").forEach((b) => (b.onclick = () => { w.openings.splice(+b.dataset.delo, 1); recalc(); }));
+  const on = (id, f) => { const el = $(id); if (el) el.onclick = f; };
+  on("#addOp", () => { const L = w.x1 - w.x0; w.openings.push({ type: "Окно", x0: Math.round(w.x0 + L / 2 - 1000), x1: Math.round(w.x0 + L / 2 + 1000), y0: 2000, y1: 3000, label: "" }); recalc(); });
+  on("#addExt", () => { PRJ.walls.push({ code: "Н" + (PRJ.walls.length + 1), title: "Фасад", kind: "ext", base: 0, x0: -300, x1: 24300, height: 6000, axes: [{ x: 0, name: "1" }], columns: [0, 6000, 12000, 18000, 24000], posts: [], openings: [] }); S.sel = PRJ.walls.length - 1; recalc(); });
+  on("#addPart", () => { PRJ.walls.push({ code: "П" + (PRJ.walls.length + 1), title: "Перегородка", kind: "part", base: 0, x0: 0, x1: 6000, height: 3600, axes: [], columns: [0, 6000], posts: [], openings: [] }); S.sel = PRJ.walls.length - 1; recalc(); });
+  on("#delWall", () => { PRJ.walls.splice(S.sel, 1); S.sel = Math.max(0, S.sel - 1); recalc(); });
+  on("#dupWall", () => { const c = clone(w); c.code = w.code + "'"; c.title = w.title + " (копия)"; PRJ.walls.splice(S.sel + 1, 0, c); S.sel++; recalc(); });
+  const ro = $("#roofOn"); if (ro) ro.onchange = () => { PRJ.roof = ro.checked ? { length: 24000, slopeLength: 9000, slopes: 2, slopeDeg: 10, purlinStep: 1500 } : null; recalc(); };
+  main.querySelectorAll("[data-roof]").forEach((el) => (el.onchange = () => { PRJ.roof[el.dataset.roof] = el.value === "" ? null : num(el.value); recalcSoon(renderTabs); }));
+  const cn = $("#corners"); if (cn) cn.onchange = () => { PRJ.corners = num(cn.value); recalcSoon(); };
+}
+
+/* =================== 3. НОРМЫ =================== */
+const RULES = [
+  ["Стеновые панели", [
+    ["panel.maker", "Производитель (префикс)", "text"], ["panel.thickness", "Толщина стен, мм", "num"], ["panel.width", "Рабочая ширина, мм", "sel", [1000, 1095, 1160, 1190]],
+    ["panel.lock", "Замок", "sel", ["Z-LOCK", "SECRET FIX"]], ["panel.core", "Утеплитель", "sel", ["МВ", "ППС", "PIR"]], ["panel.cls", "Класс ГОСТ 32603", "sel", ["1", "2"]],
+    ["panel.orient", "Раскладка стен", "sel", [["horizontal", "горизонтальная"], ["vertical", "вертикальная (Z-LOCK)"]]],
+    ["panel.metal", "Толщина металла, мм", "num"], ["panel.outer", "Цвет снаружи, RAL", "text"], ["panel.inner", "Цвет внутри, RAL", "text"],
+    ["panel.band", "Цвет верхней полосы, RAL (пусто — нет)", "text"], ["panel.bandRows", "Рядов в полосе", "num"], ["panel.corner", "Цвет наружных углов, RAL", "text"],
+    ["panel.partThickness", "Толщина перегородок, мм", "num"], ["panel.partColor", "Цвет перегородок, RAL", "text"],
+    ["panel.maxL", "Макс. длина панели, мм", "num"], ["panel.minL", "Мин. заводская длина, мм", "num"], ["panel.gap", "Зазор в стыке на опоре, мм", "num"],
+    ["panel.rigelStep", "Шаг ригелей (верт. раскладка), мм", "num"], ["panel.spanWarn", "Предупреждать при пролёте >, мм", "num"], ["panel.sealOuter", "Герметизировать наружный замок", "chk"],
+  ]],
+  ["Кровельные панели", [["roof.thickness", "Толщина, мм", "num"], ["roof.width", "Рабочая ширина, мм", "num"], ["roof.outer", "Цвет снаружи, RAL", "text"], ["roof.inner", "Цвет внутри, RAL", "text"], ["roof.overlap", "Нахлёст по длине, мм", "num"], ["roof.eave", "Свес у карниза, мм", "num"]]],
+  ["Масса панелей", [["weight.steel", "Две облицовки 0,5 мм, кг/м²", "num"], ["weight.glue", "Клей, кг/м²", "num"], ["weight.dens.МВ", "Плотность МВ, кг/м³", "num"], ["weight.dens.ППС", "Плотность ППС, кг/м³", "num"], ["weight.dens.PIR", "Плотность PIR, кг/м³", "num"], ["weight.roofExtra", "Добавка кровельной, кг/м²", "num"]]],
+  ["Упаковка в пачки", [["pack.maxH", "Макс. высота пачки, мм", "num"], ["pack.foam", "Пенопласт сверху+снизу, мм", "num"], ["pack.roofFeet", "Бруски под кровельную пачку, мм", "num"], ["pack.roofRib", "Высота гофра кровельной, мм", "num"], ["pack.maxKg", "Макс. масса пачки, кг", "num"], ["pack.extraW", "Добавка к ширине пачки, мм", "num"]]],
+  ["Машина", [["truck.name", "Название", "text"], ["truck.L", "Длина кузова, мм", "num"], ["truck.W", "Ширина кузова, мм", "num"], ["truck.H", "Высота штабеля, мм", "num"], ["truck.tiers", "Ярусов не более", "num"], ["truck.payload", "Грузоподъёмность, кг", "num"], ["truck.overhang", "Допустимый свес, мм", "num"]]],
+  ["Поддоны с фасонкой и крепежом", [["fiPallet.pcs", "ФИ на поддон, шт.", "num"], ["fiPallet.maxKg", "Масса поддона, кг", "num"], ["fiPallet.L", "Длина, мм", "num"], ["fiPallet.H", "Высота, мм", "num"]]],
+  ["Крепёж", [["fix.wallPerSup", "Саморезов на панель в опоре (стены)", "num"], ["fix.partPerSup", "То же (перегородки)", "num"], ["fix.roofPerPurlin", "На панель на прогон (кровля)", "num"], ["fix.fiStep", "Шаг крепления ФИ, мм", "num"], ["fix.anchorStep", "Шаг анкеров цоколя, мм", "num"], ["fix.roofStitch", "Шаг сшивки кровли, мм", "num"], ["fix.cartridgeM", "П.м шва на картридж", "num"], ["fix.reserve", "Запас, %", "num"]]],
+];
+const getP = (path) => path.split(".").reduce((o, k) => (o ? o[k] : undefined), P);
+const setP = (path, v) => { const ks = path.split("."); let o = P; ks.slice(0, -1).forEach((k) => (o = o[k] = o[k] || {})); o[ks[ks.length - 1]] = v; };
+function tabRules() {
+  const nPack = (t) => Math.floor((P.pack.maxH - P.pack.foam) / t);
+  return `
+  <div class="card">
+    <div class="ptitle"><h2 style="margin:0">Нормы расчёта</h2><button type="button" id="rulesReset">Вернуть исходные</button></div>
+    <div class="rules" style="margin-top:12px">
+      <div class="rule"><b>Раскладка</b>Горизонтальная: ряды по ширине панели снизу вверх, стыки только на колоннах и стойках, длина ≤ ${fmt(P.panel.maxL)} мм. Короче ${fmt(P.panel.minL)} мм — нарезка из заготовок.</div>
+      <div class="rule"><b>Пачка</b>Высота ≤ ${fmt(P.pack.maxH)} мм с пенопластом, масса ≤ ${fmt(P.pack.maxKg)} кг, длинные снизу. Стены ${P.panel.thickness} мм — до ${nPack(P.panel.thickness)} шт. в пачке.</div>
+      <div class="rule"><b>Машина</b>${esc(P.truck.name)}: ${fmt(P.truck.L)}×${fmt(P.truck.W)} мм, ${fmt(P.truck.payload / 1000, 1)} т; пачки в ${Math.floor(P.truck.W / (P.panel.width + P.pack.extraW))} ряда по ширине, до ${P.truck.tiers} ярусов и ${fmt(P.truck.H)} мм по высоте; короткая пачка — только на более длинную.</div>
+    </div>
+    <p class="hint" style="margin-top:10px">Источники: каталог «Металл Профиль» (Ver6, 2025) — длины саморезов, масса, нахлёсты, уклоны; инструкции DoorHan и заводов ТСП — пакет ≤ 1260 мм, ≤ 3,5 т, 2 пачки по ширине, до 3 ярусов (2,4 м). Изменения сохраняются в этом браузере.</p>
+  </div>
+  ${RULES.map(([title, fields]) => `<div class="card"><h3>${title}</h3><div class="form">${fields.map(([path, label, type, opts]) => {
+    const v = getP(path);
+    if (type === "sel") return `<label>${label}<select data-p="${path}">${opts.map((o) => { const [val, lab] = Array.isArray(o) ? o : [o, o]; return `<option value="${val}" ${String(v) === String(val) ? "selected" : ""}>${lab}</option>`; }).join("")}</select></label>`;
+    if (type === "chk") return `<label class="row" style="gap:6px;align-self:end"><input type="checkbox" data-p="${path}" ${v ? "checked" : ""}> ${label}</label>`;
+    return `<label>${label}<input type="${type === "num" ? "number" : "text"}" step="any" data-p="${path}" value="${esc(v ?? "")}"></label>`;
+  }).join("")}</div></div>`).join("")}
+  <div class="card"><h3>Длина саморезов для панелей, мм (Harpoon, подконструкция до 12,5 мм)</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>Толщина</th>${Object.keys(P.screws["Z-LOCK"]).map((t) => `<th class="n">${t}</th>`).join("")}</tr></thead><tbody>
+    ${[["Z-LOCK", "Стена Z-LOCK"], ["SECRET FIX", "Стена SECRET FIX"], ["roof", "Кровля (в гребень)"]].map(([k, l]) => `<tr><td>${l}</td>${Object.keys(P.screws["Z-LOCK"]).map((t) => `<td class="n">${P.screws[k][t] ?? "—"}</td>`).join("")}</tr>`).join("")}
+    </tbody></table></div><p class="hint">Для колонн с полкой толще 12,5 мм нужен крепёж на большую толщину или предварительное сверление.</p></div>`;
+}
+function bindRules() {
+  $("#main").querySelectorAll("[data-p]").forEach((el) => (el.onchange = () => {
+    const path = el.dataset.p, cur = getP(path);
+    const v = el.type === "checkbox" ? el.checked : typeof cur === "number" ? num(el.value) : el.value.trim();
+    setP(path, v); recalc(true); const sc = window.scrollY; renderTab(); window.scrollTo(0, sc);
+  }));
+  $("#rulesReset").onclick = () => { P = clone(DEFAULTS); recalc(); toast("Нормы сброшены"); };
+}
+
+/* =================== SVG: стена =================== */
+function legendHTML() {
+  return `<div class="legend" style="margin-top:8px"><span><i style="border-color:var(--col);border-top-style:dashed"></i>колонна</span><span><i style="border-color:var(--ok);border-top-style:dotted"></i>стойка фахверка / обрамления</span><span><i style="border-color:var(--post-need);border-top-width:3px;border-top-style:dashed"></i>стойки нет в каркасе — нужна</span><span><i style="border-color:var(--err)"></i>вырез в панели</span><span><i style="border-color:var(--open)"></i>проём</span></div>`;
+}
+function wallSVG(w, opts = {}) {
+  const rise = w.gable && w.gable.rise > 0 ? w.gable.rise : 0;
+  const x0 = w.x0, x1 = w.x1, H = w.height + rise, Hw = w.height, L = x1 - x0;
+  const k = L / 1100;
+  const fs = Math.max(120, Math.min(260, k * 11));
+  const mL = fs * 5.5, mR = fs * 2.5, mT = fs * 1.6, mB = fs * 9;
+  const vb = [x0 - mL, -H - mT, L + mL + mR, H + mT + mB];
+  const Y = (y) => -y;
+  const BG = opts.print ? "#fff" : "var(--surface)";
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(" ")}" font-family="IBM Plex Sans, Arial, sans-serif" role="img" aria-label="Раскладка ${esc(w.title)}" style="color:${opts.print ? "#1C2126" : "var(--ink)"}">`;
+  s += `<rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" style="fill:${opts.print ? "#fff" : "var(--surface)"}"/>`;
+  for (const p of w.pieces) {
+    const hex = ralHex(p.color), tc = lum(hex) > 0.55 ? "#1C2126" : "#FFFFFF";
+    s += `<rect x="${p.x0}" y="${Y(p.y1)}" width="${p.x1 - p.x0}" height="${p.y1 - p.y0}" fill="${hex}" fill-opacity="0.82" stroke="#1C2126" stroke-width="${fs * 0.1}"/>`;
+    for (const c of p.cuts) s += `<rect x="${c.x0}" y="${Y(c.y1)}" width="${c.x1 - c.x0}" height="${c.y1 - c.y0}" fill="#fff" stroke="#B3261E" stroke-width="${fs * 0.12}"/><path d="M${c.x0} ${Y(c.y0)}L${c.x1} ${Y(c.y1)}" stroke="#B3261E" stroke-width="${fs * 0.06}"/>`;
+    const pw = p.x1 - p.x0, ph = p.y1 - p.y0, cx = (p.x0 + p.x1) / 2, cy = Y(p.y0 + ph * (p.cuts.length ? 0.68 : 0.5));
+    const f = Math.min(fs, ph * 0.34, pw * 0.16);
+    if (p.vertical) {
+      if (pw > fs * 2.2 && ph > fs * 6) s += `<text x="${cx}" y="${cy}" font-size="${Math.min(fs, pw * 0.22)}" fill="${tc}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 ${cx} ${cy})">${esc(p.mark)} · ${p.L}</text>`;
+    } else if (pw > fs * 11) s += `<text x="${cx}" y="${cy}" font-size="${f}" fill="${tc}" text-anchor="middle" dominant-baseline="middle">${esc(p.mark)}  L=${p.L}</text>`;
+    else if (pw > fs * 4.2) s += `<text x="${cx}" y="${cy - f * 0.35}" font-size="${f * 0.9}" fill="${tc}" text-anchor="middle" dominant-baseline="middle">${esc(p.mark)}</text><text x="${cx}" y="${cy + f * 0.75}" font-size="${f * 0.8}" fill="${tc}" text-anchor="middle" dominant-baseline="middle">${p.L}</text>`;
+    else if (pw > fs * 1.4) s += `<text x="${cx}" y="${cy}" font-size="${Math.min(f, pw * 0.3)}" fill="${tc}" text-anchor="middle" dominant-baseline="middle">${esc(p.mark.split("-").pop())}</text>`;
+  }
+  for (const o of w.openings || []) {
+    s += `<rect x="${o.x0}" y="${Y(o.y1)}" width="${o.x1 - o.x0}" height="${o.y1 - o.y0}" style="fill:${opts.print ? "#fff" : "var(--surface)"}" stroke="#2B5C9E" stroke-width="${fs * 0.12}"/>`;
+    s += `<path d="M${o.x0} ${Y(o.y0)}L${o.x1} ${Y(o.y1)}M${o.x0} ${Y(o.y1)}L${o.x1} ${Y(o.y0)}" stroke="#2B5C9E" stroke-width="${fs * 0.04}"/>`;
+    if (o.x1 - o.x0 > fs * 9 && o.y1 - o.y0 > fs * 1.2) s += `<text x="${(o.x0 + o.x1) / 2}" y="${Y((o.y0 + o.y1) / 2)}" font-size="${fs * 0.75}" fill="#2B5C9E" text-anchor="middle" dominant-baseline="middle">${esc(o.label || o.type)}</text>`;
+  }
+  const line = (x, col, dash, sw) => `<path d="M${x} ${Y(-fs * 0.6)}L${x} ${Y(H + fs * 0.6)}" stroke="${col}" stroke-width="${sw}" stroke-dasharray="${dash}" fill="none"/>`;
+  for (const c of w.columns || []) s += line(c, "#26508F", `${fs * 1.2} ${fs * 0.4} ${fs * 0.2} ${fs * 0.4}`, fs * 0.12);
+  for (const c of w.posts || []) if (!(w.columns || []).includes(c)) s += line(c, "#2E7A4E", `${fs * 0.3} ${fs * 0.3}`, fs * 0.12);
+  for (const c of w.needPosts || []) s += line(c, "#E07B00", `${fs * 0.6} ${fs * 0.3}`, fs * 0.22);
+  if (rise) {
+    const top = w.gable.type === "1" ? `L${x1} ${Y(H)}L${x0} ${Y(Hw)}` : `L${(x0 + x1) / 2} ${Y(H)}L${x0} ${Y(Hw)}`;
+    const cut = w.gable.type === "1" ? `M${x0} ${Y(Hw)}L${x1} ${Y(H)}L${x0} ${Y(H)}Z` : `M${x0} ${Y(Hw)}L${(x0 + x1) / 2} ${Y(H)}L${x0} ${Y(H)}ZM${x1} ${Y(Hw)}L${(x0 + x1) / 2} ${Y(H)}L${x1} ${Y(H)}Z`;
+    s += `<path d="${cut}" style="fill:${BG}" fill-opacity="0.78"/>`;
+    s += `<path d="M${x0} ${Y(0)}L${x1} ${Y(0)}L${x1} ${Y(Hw)}${top}Z" fill="none" stroke="currentColor" stroke-width="${fs * 0.22}"/>`;
+  } else s += `<rect x="${x0}" y="${Y(H)}" width="${L}" height="${H}" fill="none" stroke="currentColor" stroke-width="${fs * 0.22}"/>`;
+  // отметки
+  const lv = uniqSort([0, Hw, H, ...w.rows.map((r) => r[0])]);
+  const lvT = lv.length > 14 ? [0, H] : lv;
+  for (const y of lvT) {
+    const t = (w.base + y) / 1000; const lab = (t === 0 ? "±" : t > 0 ? "+" : "") + t.toFixed(3).replace(".", ",");
+    s += `<path d="M${x0 - fs * 4.8} ${Y(y)}L${x0 - fs * 0.3} ${Y(y)}" stroke="currentColor" stroke-opacity="0.55" stroke-width="${fs * 0.05}"/><text x="${x0 - fs * 4.8}" y="${Y(y) - fs * 0.15}" font-size="${fs * 0.7}" fill="currentColor" fill-opacity="0.75">${lab}</text>`;
+  }
+  // размерные цепочки
+  const chain = (pts, yy, small) => {
+    pts = uniqSort(pts.filter((p) => p >= x0 - 1 && p <= x1 + 1));
+    let t = `<path d="M${pts[0]} ${yy}L${pts[pts.length - 1]} ${yy}" stroke="currentColor" stroke-opacity="0.55" stroke-width="${fs * 0.05}"/>`;
+    for (const p of pts) t += `<path d="M${p - fs * 0.25} ${yy + fs * 0.25}L${p + fs * 0.25} ${yy - fs * 0.25}" stroke="currentColor" stroke-width="${fs * 0.09}"/>`;
+    for (let i = 1; i < pts.length; i++) { const d = pts[i] - pts[i - 1]; if (d > fs * (small ? 2.3 : 3)) t += `<text x="${(pts[i] + pts[i - 1]) / 2}" y="${yy - fs * 0.2}" font-size="${fs * (small ? 0.62 : 0.72)}" fill="currentColor" text-anchor="middle">${d}</text>`; }
+    return t;
+  };
+  const op = [x0, x1]; for (const o of w.openings || []) op.push(o.x0, o.x1); for (const c of w.needPosts || []) op.push(c);
+  s += chain(op, fs * 1.3, true);
+  const ax = (w.axes || []).map((a) => a.x);
+  if (ax.length) s += chain([x0, ...ax, x1], fs * 3.1);
+  s += chain([x0, x1], fs * 4.9);
+  for (const a of w.axes || []) s += `<path d="M${a.x} ${fs * 5.2}L${a.x} ${fs * 6.2}" stroke="currentColor" stroke-opacity="0.55" stroke-width="${fs * 0.05}"/><circle cx="${a.x}" cy="${fs * 7}" r="${fs * 0.8}" style="fill:${BG}" stroke="currentColor" stroke-width="${fs * 0.07}"/><text x="${a.x}" y="${fs * 7}" font-size="${fs * 0.85}" text-anchor="middle" dominant-baseline="central" fill="currentColor">${esc(a.name)}</text>`;
+  return s + `</svg>`;
+}
+function roofSVG(r, opts = {}) {
+  const ns = r.slopes || 1, gap = 1500, S = r.S, L = r.length;
+  const fs = Math.max(120, Math.min(260, L / 100));
+  const Wt = L, Ht = S * ns + gap * (ns - 1);
+  const vb = [-fs * 3, -fs * 2, Wt + fs * 6, Ht + fs * 5];
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(" ")}" font-family="IBM Plex Sans, Arial, sans-serif" style="color:${opts.print ? "#1C2126" : "var(--ink)"}">`;
+  s += `<rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" style="fill:${opts.print ? "#fff" : "var(--surface)"}"/>`;
+  for (let sl = 0; sl < ns; sl++) {
+    const oy = sl * (S + gap);
+    s += `<text x="0" y="${oy - fs * 0.5}" font-size="${fs}" fill="currentColor">Скат ${sl + 1}: ${r.nAcross} панелей × ${r.k} по длине ската, L = ${r.Ls.join(" / ")} мм${r.k > 1 ? `, нахлёст ${P.roof.overlap}` : ""}</text>`;
+    for (const p of r.pieces.filter((q) => q.slope === sl)) {
+      const hex = ralHex(p.color), tc = lum(hex) > 0.55 ? "#1C2126" : "#fff";
+      s += `<rect x="${p.x0}" y="${oy + p.y0}" width="${p.x1 - p.x0}" height="${p.L}" fill="${hex}" fill-opacity="0.75" stroke="#1C2126" stroke-width="${fs * 0.08}"/>`;
+      if (p.x1 - p.x0 > fs * 1.2 && p.x0 % (1000 * Math.max(1, Math.ceil(fs * 5 / 1000))) < 1) s += `<text x="${(p.x0 + p.x1) / 2}" y="${oy + p.y0 + p.L / 2}" font-size="${fs * 0.7}" fill="${tc}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 ${(p.x0 + p.x1) / 2} ${oy + p.y0 + p.L / 2})">${esc(p.mark)}</text>`;
+    }
+  }
+  return s + `</svg>`;
+}
+
+/* =================== РАСКЛАДКА =================== */
+function marksTable(code) {
+  const ms = R.marks.filter((m) => m.wall === code || (code === "К" && m.kind === "roof"));
+  return `<div class="tbl-wrap"><table><thead><tr><th>Марка</th><th class="n">Длина</th><th class="n">Ширина в деле</th><th class="n">Кол-во</th><th>Цвет</th><th>Примечание</th></tr></thead><tbody>${ms.map((m) => {
+    const notes = [];
+    if (m.b !== m.W) notes.push(`распустить до ${m.b} мм`);
+    if (m.cuts.length) notes.push(m.cuts.map((c) => `вырез ${c.x1 - c.x0}×${c.y1 - c.y0}`).join(", "));
+    if (m.blanks.size) notes.push("нарезать из " + [...m.blanks].join(", "));
+    if (m.diag) notes.push("срез по уклону фронтона по месту");
+    return `<tr><td class="mono">${esc(m.mark)}</td><td class="n">${m.L}</td><td class="n">${m.b}</td><td class="n">${m.n}</td><td><span class="sw" style="background:${ralHex(m.color)}"></span>${m.color}/${m.inner}</td><td class="small">${esc(notes.join("; "))}</td></tr>`;
+  }).join("")}</tbody></table></div>`;
+}
+function tabLayout() {
+  if (!R || (!R.walls.length && !R.roof)) return `<div class="card empty">Нет геометрии. Загрузите проект или откройте пример.</div>`;
+  return R.walls.map((w) => `
+    <div class="card">
+      <div class="ptitle"><h2 style="margin:0">${esc(w.code)} — ${esc(w.title)}</h2><span class="muted small mono">${fmt(w.x1 - w.x0)} × ${fmt(w.height)} мм · ${w.pieces.length} панелей · ${new Set(w.pieces.map((p) => p.mark)).size} марок</span></div>
+      <div class="svgbox" style="margin-top:10px">${wallSVG(w)}</div>
+      <details><summary>Марки панелей (${new Set(w.pieces.map((p) => p.mark)).size})</summary><div style="margin-top:8px">${marksTable(w.code)}</div></details>
+    </div>`).join("") + (R.roof ? `<div class="card"><h2>Кровля</h2><div class="svgbox">${roofSVG(R.roof)}</div><details><summary>Марки кровельных панелей</summary><div style="margin-top:8px">${marksTable("К")}</div></details></div>` : "") + `<div class="card">${legendHTML()}</div>`;
+}
+
+/* =================== СПЕЦИФИКАЦИЯ =================== */
+function tabSpec() {
+  if (!R || !R.order.length) return `<div class="card empty">Нет данных</div>`;
+  const t = R.totals;
+  return `
+  <div class="card">
+    <h2>Панели к заказу</h2>
+    <div class="row small" style="margin-bottom:10px;gap:14px">${t.byColor.map((c) => `<span><span class="sw" style="background:${ralHex(c.color)}"></span>${c.kind === "roof" ? "кровля" : "стены"} ${c.color}/${c.inner}: <b class="mono">${fmt(c.area, 1)} м²</b>, ${c.n} шт.</span>`).join("")}</div>
+    <div class="tbl-wrap"><table><thead><tr><th class="n">Поз.</th><th>Обозначение</th><th class="n">Длина, мм</th><th class="n">Кол-во</th><th class="n">Площадь, м²</th><th class="n">Масса, кг</th><th>Марки</th><th>Примечание</th></tr></thead><tbody>
+      ${R.order.map((o) => `<tr><td class="n">${o.pos}</td><td class="small">${esc(o.desig)}</td><td class="n">${o.L}</td><td class="n">${o.n}</td><td class="n">${fmt(o.area, 2)}</td><td class="n">${fmt(o.kg)}</td><td class="small mono">${esc(o.marks.join(", "))}</td><td class="small">${esc(o.notes.join("; "))}</td></tr>`).join("")}
+    </tbody><tfoot><tr><td></td><td>Итого</td><td></td><td class="n">${fmt(t.orderPcs)}</td><td class="n">${fmt(t.orderArea, 2)}</td><td class="n">${fmt(t.orderKg)}</td><td colspan="2" class="small">нетто в деле ${fmt(t.netArea, 2)} м², отход ${fmt(t.waste, 2)} м²</td></tr></tfoot></table></div>
+  </div>
+  <div class="card"><h2>Фасонные изделия</h2>
+    <div class="tbl-wrap"><table><thead><tr><th>Марка</th><th>Наименование</th><th>Сечение</th><th class="n">Развёртка</th><th>Материал / цвет</th><th class="n">Длина изд.</th><th class="n">П.м узлов</th><th class="n">Шт.</th><th class="n">С запасом</th></tr></thead><tbody>
+    ${R.fi.map((f) => `<tr><td class="mono">${f.code}</td><td>${esc(f.name)}</td><td class="small">${esc(f.sketch)}</td><td class="n">${f.razv}</td><td class="small">${esc(f.mat)}, ${esc(f.color)}</td><td class="n">${f.std}</td><td class="n">${fmt(f.len, 1)}</td><td class="n">${f.pcs}</td><td class="n">${f.pcsRes}</td></tr>`).join("")}
+    </tbody></table></div><p class="hint">Кол-во = ⌈(L узла − нахлёст)/(L изделия − нахлёст)⌉; нахлёст горизонтальных 50 мм, вертикальных 100 мм; ФИУ — встык. Сечения уточнить по альбому технических решений производителя.</p></div>
+  <div class="grid2">
+    <div class="card"><h2>Крепёж</h2><div class="tbl-wrap"><table><thead><tr><th>Наименование</th><th>Размер</th><th>Назначение</th><th class="n">Расчёт</th><th class="n">С запасом</th><th class="n">Упак.</th></tr></thead><tbody>
+      ${R.fx.map((x) => `<tr><td>${esc(x.name)}</td><td class="mono">${esc(x.size)}</td><td class="small">${esc(x.purpose)}<br><span class="muted">${esc(x.norm)}</span></td><td class="n">${fmt(x.qty)}</td><td class="n">${fmt(x.qtyRes)}</td><td class="n">${x.packs}×${x.pack}</td></tr>`).join("")}
+    </tbody></table></div></div>
+    <div class="card"><h2>Уплотнители и герметики</h2><div class="tbl-wrap"><table><thead><tr><th>Наименование</th><th>Ед.</th><th class="n">Кол-во</th><th>Основание</th></tr></thead><tbody>
+      ${R.seals.map((x) => `<tr><td>${esc(x.name)}</td><td>${x.unit}</td><td class="n">${fmt(x.qty, x.unit === "м³" ? 2 : 0)}</td><td class="small muted">${esc(x.base)}</td></tr>`).join("")}
+    </tbody></table></div></div>
+  </div>`;
+}
+
+/* =================== УПАКОВКА =================== */
+function tabPacks() {
+  if (!R || !R.packs.length) return `<div class="card empty">Нет данных</div>`;
+  const types = {};
+  for (const p of R.packs.filter((x) => x.kind !== "fi")) { const k = `${p.kind === "roof" ? "Кровля" : "Стены"} ${p.t} мм`; types[k] = p.nByH; }
+  return `
+  <div class="card">
+    <h2>Правила упаковки</h2>
+    <div class="rules">
+      ${Object.entries(types).map(([k, n]) => `<div class="rule"><b>${k}</b>до ${n} панелей в пачке (≤ ${fmt(P.pack.maxH)} мм, ≤ ${fmt(P.pack.maxKg)} кг)</div>`).join("")}
+      <div class="rule"><b>Порядок в пачке</b>Снизу самая длинная, каждая следующая короче. Один тип и цвет на пачку. Пенопласт ${P.pack.foam / 2} мм сверху и снизу, плёнка.</div>
+      <div class="rule"><b>Фасонка и крепёж</b>На поддонах ${fmt(P.fiPallet.L)} мм, до ${P.fiPallet.pcs} изделий и ${fmt(P.fiPallet.maxKg)} кг на поддон.</div>
+    </div>
+  </div>
+  <div class="card"><h2>Ведомость пачек (${R.totals.packs} + ${R.totals.pallets} поддона)</h2>
+    <div class="tbl-wrap"><table><thead><tr><th>Пачка</th><th>Тип</th><th>Цвет</th><th class="n">Шт.</th><th class="n">Длины, мм</th><th class="n">Высота, мм</th><th class="n">м²</th><th class="n">Масса, кг</th><th>Содержимое</th><th class="n">Машина</th></tr></thead><tbody>
+    ${R.packs.map((p) => `<tr><td class="mono"><b>${p.id}</b></td><td>${p.kind === "fi" ? "поддон ФИ" : (p.kind === "roof" ? "кровля " : "стена ") + p.t}</td><td>${p.color ? `<span class="sw" style="background:${ralHex(p.color)}"></span>${p.color}/${p.inner}` : "—"}</td><td class="n">${p.n || "—"}</td><td class="n">${p.lengths}</td><td class="n">${p.h}</td><td class="n">${p.area ? fmt(p.area, 1) : "—"}</td><td class="n">${fmt(p.kg)}</td><td class="small">${esc(p.content)}</td><td class="n"><b>${p.truck ?? "—"}</b></td></tr>`).join("")}
+    </tbody></table></div>
+  </div>`;
+}
+
+/* =================== МАШИНЫ =================== */
+function truckSVG(tr, opts = {}) {
+  const T = P.truck, cab = 2200, lanesN = tr.lanes.length, lw = T.W / lanesN;
+  const fs = 220, Wv = T.L + cab + T.overhang + 600, Hv = T.W + 900;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 -500 ${Wv} ${Hv}" font-family="IBM Plex Sans, Arial, sans-serif" role="img" aria-label="Схема загрузки машины ${tr.no}" style="color:${opts.print ? "#1C2126" : "var(--ink)"}">`;
+  s += `<rect x="0" y="0" width="${cab - 200}" height="${T.W}" rx="260" fill="#5B646E"/><rect x="${cab - 1150}" y="180" width="700" height="${T.W - 360}" rx="80" fill="#9AA1A8"/>`;
+  s += `<rect x="${cab}" y="0" width="${T.L}" height="${T.W}" fill="none" stroke="currentColor" stroke-opacity="0.6" stroke-width="40"/>`;
+  s += `<text x="${cab}" y="-140" font-size="${fs}" fill="currentColor" fill-opacity="0.75">кабина →  кузов ${fmt(T.L)} × ${fmt(T.W)} мм</text>`;
+  tr.lanes.forEach((lane, li) => {
+    let x = cab;
+    for (const st of lane) {
+      const bottom = st.items[0], hex = bottom.kind === "fi" ? "#C9A86A" : ralHex(bottom.color);
+      const tc = lum(hex) > 0.55 ? "#1C2126" : "#fff";
+      const y = li * lw + 40, h = lw - 80;
+      s += `<rect x="${x + 30}" y="${y}" width="${st.L - 60}" height="${h}" fill="${hex}" fill-opacity="0.85" stroke="#1C2126" stroke-width="30"/>`;
+      const label = st.items.map((p) => p.id).join(" / ");
+      const f = Math.min(fs * 1.1, (st.L - 200) / (label.length * 0.62));
+      s += `<text x="${x + st.L / 2}" y="${y + h / 2 - f * 0.35}" font-size="${f}" fill="${tc}" text-anchor="middle" dominant-baseline="middle" font-weight="600">${esc(label)}</text>`;
+      s += `<text x="${x + st.L / 2}" y="${y + h / 2 + f * 0.8}" font-size="${f * 0.75}" fill="${tc}" text-anchor="middle" dominant-baseline="middle">${st.items.length} яр. · ${fmt(st.L)} мм · ${fmt(st.kg)} кг</text>`;
+      x += st.L;
+    }
+  });
+  if (T.overhang) s += `<path d="M${cab + T.L} -60L${cab + T.L} ${T.W + 60}" stroke="#B3261E" stroke-width="20" stroke-dasharray="80 60"/>`;
+  return s + `</svg>`;
+}
+function tabTrucks() {
+  if (!R || !R.trucks.length) return `<div class="card empty">Нет данных</div>`;
+  const T = P.truck;
+  return `
+  <div class="card">
+    <div class="ptitle"><h2 style="margin:0">Машин: ${R.trucks.length} × ${esc(T.name)}</h2><span class="muted small">масса отгрузки ${fmt(R.totals.shipKg / 1000, 2)} т · по грузоподъёмности минимум ${Math.ceil(R.totals.shipKg / T.payload)}</span></div>
+    <p class="hint" style="margin-top:6px">Пачки уложены в ${R.lanesN} ряда по ширине кузова, в штабеле до ${T.tiers} ярусов и ${fmt(T.H)} мм, сверху только более короткие пачки. Загружать от кабины; тяжёлые и длинные — вниз. Распределение по осям проверяет перевозчик.</p>
+  </div>
+  ${R.trucks.map((tr) => `
+  <div class="card truck">
+    <div class="truck-head"><b>Машина ${tr.no}</b>${tr.special ? `<span class="chip err">нужен длинномер</span>` : ""}
+      <span class="small">масса <span class="mono">${fmt(tr.kg)}</span> кг <span class="bar ${tr.kg > T.payload ? "over" : ""}"><span style="width:${Math.min(100, tr.fillKg * 100)}%"></span></span></span>
+      <span class="small">длина <span class="mono">${fmt(tr.fillL * 100)}</span>% <span class="bar"><span style="width:${Math.min(100, tr.fillL * 100)}%"></span></span></span>
+      <span class="small">панели <span class="mono">${fmt(tr.area, 1)}</span> м² · пачек ${tr.packs.length}</span></div>
+    <div class="svgbox">${truckSVG(tr)}</div>
+    <details><summary>Порядок загрузки</summary><div class="tbl-wrap" style="margin-top:8px"><table><thead><tr><th>Ряд</th><th>Место от кабины</th><th>Ярус</th><th>Пачка</th><th class="n">Длина</th><th class="n">Масса</th><th>Содержимое</th></tr></thead><tbody>
+      ${tr.lanes.map((lane, li) => lane.map((st, si) => st.items.map((p, ti) => `<tr><td>${li === 0 ? "левый" : li === 1 ? "правый" : li + 1}</td><td>${si + 1}</td><td>${ti + 1}${ti === 0 ? " (низ)" : ""}</td><td class="mono"><b>${p.id}</b></td><td class="n">${p.lengths}</td><td class="n">${fmt(p.kg)}</td><td class="small">${esc(p.content)}</td></tr>`).join("")).join("")).join("")}
+    </tbody></table></div></details>
+  </div>`).join("")}`;
+}
+
+/* =================== ЗАМЕЧАНИЯ =================== */
+function tabFlags() {
+  const F = R ? R.flags : [];
+  return `
+  <div class="card"><h2>Замечания по расчёту (${F.length})</h2>
+    <div style="display:grid;gap:6px">${F.map((f) => `<div class="flag ${f.lvl === "err" ? "err" : ""}"><span class="w">${esc(f.wall)}</span><span>${esc(f.t)}</span></div>`).join("") || `<div class="muted">Замечаний нет.</div>`}</div>
+  </div>
+  ${PRJ.notes && PRJ.notes.length ? `<div class="card"><h2>Допущения и расхождения в проекте</h2><ul>${PRJ.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
+  <div class="card"><h2>Ограничения</h2><ul class="small">
+    <li>Несущая способность панелей, крепежа и фахверка на ветровую и снеговую нагрузку не рассчитывается. Нормы крепежа — рекомендации производителя; подтвердить расчётом по СП 362.1325800.2017.</li>
+    <li>Распознанные размеры сверить с чертежами; перед заказом — с фактическими отметками каркаса.</li>
+    <li>Схема загрузки — расчётная; перевозчик проверяет распределение массы по осям и крепление.</li>
+    <li>Сечения фасонных изделий — типовые; уточнить по альбому технических решений производителя.</li>
+  </ul></div>`;
+}
+
+/* =================== ЭКСПОРТ =================== */
+async function saveFile(filename, data) {
+  const dl = await cap("downloads");
+  if (dl) {
+    try { await dl.save({ filename, data }); toast("Файл передан на сохранение"); return; }
+    catch (e) { if (e && e.code === "declined") return; }
+  }
+  try {
+    const blob = data instanceof Blob ? data : new Blob([data]);
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000); toast("Файл сохранён: " + filename);
+  } catch (e) { toast("Не удалось сохранить файл в этом просмотре"); }
+}
+const safeName = () => (PRJ.name || "проект").replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 60);
+$("#btnSave").onclick = () => saveFile(`${safeName()} — ТСП.json`, new Blob([JSON.stringify({ format: "tsp-kit", version: 1, project: PRJ, params: P }, null, 1)], { type: "application/json" }));
+$("#btnOpen").onclick = () => $("#fileJson").click();
+$("#fileJson").onchange = async (e) => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { const d = JSON.parse(await f.text()); if (!d.project) throw 0; PRJ = d.project; P = deepMerge(clone(DEFAULTS), d.params || {}); S.sel = 0; recalc(); toast("Проект открыт"); }
+  catch (er) { toast("Это не файл проекта «Комплект ТСП»"); }
+};
+$("#projName").onchange = (e) => { PRJ.name = e.target.value; persist(); };
+$("#btnXlsx").onclick = () => {
+  if (!window.XLSX) { toast("Библиотека Excel не загрузилась"); return; }
+  if (!R) return;
+  const wb = XLSX.utils.book_new(), t = R.totals;
+  const add = (name, rows, widths) => { const ws = XLSX.utils.aoa_to_sheet(rows); if (widths) ws["!cols"] = widths.map((w) => ({ wch: w })); XLSX.utils.book_append_sheet(wb, ws, name); };
+  add("Сводка", [["Объект", PRJ.name], [], ["Панели к заказу, шт.", t.orderPcs], ["Панели к заказу, м²", +t.orderArea.toFixed(2)], ["Нетто в деле, м²", +t.netArea.toFixed(2)], ["Отход, м²", +t.waste.toFixed(2)], ["Масса панелей, кг", Math.round(t.orderKg)], ["Масса отгрузки, кг", Math.round(t.shipKg)], ["Пачек", t.packs], ["Поддонов ФИ", t.pallets], ["Машин", t.trucks], ["Тип машины", P.truck.name], [], ["Цвет", "м²", "шт."], ...t.byColor.map((c) => [`${c.kind === "roof" ? "Кровля" : "Стены"} ${c.color}/${c.inner}`, +c.area.toFixed(2), c.n]), [], ["Панель", P.panel.maker + " " + P.panel.lock + " " + P.panel.thickness + " мм, " + P.panel.core + ", ширина " + P.panel.width], ["Раскладка", P.panel.orient === "vertical" ? "вертикальная" : "горизонтальная"]], [34, 60]);
+  add("Панели (заказ)", [["Поз.", "Обозначение", "Длина, мм", "Ширина, мм", "Кол-во", "Площадь, м²", "Масса, кг", "Марки", "Примечание"], ...R.order.map((o) => [o.pos, o.desig, o.L, o.W, o.n, +o.area.toFixed(3), Math.round(o.kg), o.marks.join(", "), o.notes.join("; ")]), ["", "ИТОГО", "", "", t.orderPcs, +t.orderArea.toFixed(2), Math.round(t.orderKg)]], [5, 70, 10, 10, 8, 11, 10, 40, 60]);
+  add("Марки", [["Стена", "Марка", "Длина", "Ширина в деле", "Кол-во", "Цвет", "Вырезы", "Заготовки"], ...R.marks.map((m) => [m.wall, m.mark, m.L, m.b, m.n, `${m.color}/${m.inner}`, m.cuts.map((c) => `${c.x1 - c.x0}×${c.y1 - c.y0} от торца ${c.x0}`).join("; "), [...m.blanks].join(", ")])], [8, 12, 10, 12, 8, 12, 40, 14]);
+  add("Раскладка", [["Стена", "Марка", "Ряд", "x0", "x1", "y0", "y1", "Длина заказная", "Опор", "Пролёт макс."], ...R.walls.flatMap((w) => w.pieces.map((p) => [w.code, p.mark, p.row + 1, p.x0, p.x1, p.y0 + w.base, p.y1 + w.base, p.L, p.nsup, p.span]))], [8, 12, 6, 9, 9, 9, 9, 12, 6, 10]);
+  add("Пачки", [["Пачка", "Тип", "Цвет", "Шт.", "Длины, мм", "Высота, мм", "м²", "Масса, кг", "Содержимое", "Машина"], ...R.packs.map((p) => [p.id, p.kind === "fi" ? "поддон ФИ" : `${p.kind === "roof" ? "кровля" : "стена"} ${p.t}`, p.color ? `${p.color}/${p.inner}` : "", p.n, p.lengths, p.h, +(p.area || 0).toFixed(2), Math.round(p.kg), p.content, p.truck])], [8, 12, 12, 6, 14, 10, 8, 10, 60, 8]);
+  add("Машины", [["Машина", "Ряд", "Место от кабины", "Ярус", "Пачка", "Длина", "Масса, кг"], ...R.trucks.flatMap((tr) => tr.lanes.flatMap((lane, li) => lane.flatMap((st, si) => st.items.map((p, ti) => [tr.no, li + 1, si + 1, ti + 1, p.id, p.lengths, Math.round(p.kg)])))), [], ["Машина", "Масса, кг", "Загрузка по длине, %", "Пачек"], ...R.trucks.map((tr) => [tr.no, Math.round(tr.kg), Math.round(tr.fillL * 100), tr.packs.length])], [8, 6, 14, 6, 8, 14, 10]);
+  add("Фасонные изделия", [["Марка", "Наименование", "Сечение", "Развёртка, мм", "Материал", "Цвет", "Длина изд., мм", "П.м", "Шт.", "С запасом"], ...R.fi.map((f) => [f.code, f.name, f.sketch, f.razv, f.mat, f.color, f.std, f.len, f.pcs, f.pcsRes])], [8, 44, 30, 12, 18, 12, 12, 8, 6, 10]);
+  add("Крепёж", [["Наименование", "Размер", "Назначение", "Норма", "Расчёт", "С запасом", "В упаковке", "Упаковок"], ...R.fx.map((x) => [x.name, x.size, x.purpose, x.norm, x.qty, x.qtyRes, x.pack, x.packs])], [48, 14, 40, 30, 10, 10, 10, 10]);
+  add("Уплотнители", [["Наименование", "Ед.", "Кол-во", "Основание"], ...R.seals.map((x) => [x.name, x.unit, x.qty, x.base])], [56, 6, 10, 60]);
+  add("Замечания", [["Где", "Замечание"], ...R.flags.map((f) => [f.wall, f.t]), ...(PRJ.notes || []).map((n) => ["Проект", n])], [10, 120]);
+  const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+  saveFile(`${safeName()} — комплектация ТСП.xlsx`, new Blob([buf]));
+};
+$("#btnReport").onclick = () => {
+  if (!R) return;
+  const t = R.totals;
+  const tbl = (head, rows) => `<table><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${esc(PRJ.name)} — комплектация ТСП</title><style>body{font:13px Arial,sans-serif;color:#1C2126;margin:24px}h1{font-size:22px}h2{font-size:17px;margin-top:28px;border-bottom:2px solid #D4500F;padding-bottom:3px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #ccc;padding:4px 6px;text-align:left;vertical-align:top}th{background:#F0F1F2}svg{width:100%;height:auto;border:1px solid #ddd;margin:6px 0}.k{display:inline-block;margin-right:24px}.k b{font-size:20px;display:block}@media print{h2{page-break-before:auto}.w{page-break-inside:avoid}}</style></head><body>
+  <h1>${esc(PRJ.name)} — комплектация сэндвич-панелей</h1>
+  <div><span class="k">Панели<b>${fmt(t.orderArea, 1)} м² · ${t.orderPcs} шт.</b></span><span class="k">Масса отгрузки<b>${fmt(t.shipKg / 1000, 2)} т</b></span><span class="k">Пачек / поддонов<b>${t.packs} / ${t.pallets}</b></span><span class="k">Машин<b>${t.trucks} × ${esc(P.truck.name)}</b></span></div>
+  <h2>Раскладка</h2>${R.walls.map((w) => `<div class="w"><h3>${esc(w.code)} — ${esc(w.title)}</h3>${wallSVG(w, { print: true })}</div>`).join("")}${R.roof ? `<h3>Кровля</h3>${roofSVG(R.roof, { print: true })}` : ""}
+  <h2>Панели к заказу</h2>${tbl(["Поз.", "Обозначение", "Длина", "Кол-во", "м²", "кг", "Марки", "Примечание"], R.order.map((o) => [o.pos, o.desig, o.L, o.n, fmt(o.area, 2), fmt(o.kg), o.marks.join(", "), o.notes.join("; ")]))}
+  <h2>Фасонные изделия</h2>${tbl(["Марка", "Наименование", "Цвет", "Длина изд.", "П.м", "Шт. с запасом"], R.fi.map((f) => [f.code, f.name, f.color, f.std, fmt(f.len, 1), f.pcsRes]))}
+  <h2>Крепёж</h2>${tbl(["Наименование", "Размер", "Назначение", "С запасом", "Упаковок"], R.fx.map((x) => [x.name, x.size, x.purpose, x.qtyRes, x.packs]))}
+  <h2>Уплотнители и герметики</h2>${tbl(["Наименование", "Ед.", "Кол-во"], R.seals.map((x) => [x.name, x.unit, x.qty]))}
+  <h2>Пачки</h2>${tbl(["Пачка", "Цвет", "Шт.", "Длины", "Высота", "Масса, кг", "Содержимое", "Машина"], R.packs.map((p) => [p.id, p.color ? p.color + "/" + p.inner : "ФИ", p.n || "", p.lengths, p.h, fmt(p.kg), p.content, p.truck]))}
+  <h2>Машины</h2>${R.trucks.map((tr) => `<div class="w"><h3>Машина ${tr.no}: ${fmt(tr.kg)} кг, ${fmt(tr.area, 1)} м²</h3>${truckSVG(tr, { print: true })}</div>`).join("")}
+  <h2>Замечания</h2><ul>${R.flags.map((f) => `<li><b>${esc(f.wall)}</b>: ${esc(f.t)}</li>`).join("")}${(PRJ.notes || []).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+  <p style="color:#666">Несущая способность не рассчитывалась; нормы крепежа — рекомендации производителя, подтвердить расчётом по СП 362.1325800.2017.</p></body></html>`;
+  saveFile(`${safeName()} — отчёт ТСП.html`, new Blob([html], { type: "text/html" }));
+};
+
+/* =================== старт =================== */
+loadState();
+{ const h = (location.hash || "").slice(1); if (TABS.some((t) => t[0] === h)) S.tab = h; }
+recalc();
+if (S.ai === "checking") cap("sample").then((sm) => { S.ai = sm ? "yes" : "no"; if (S.tab === "project") renderTab(); });
+</script>
+
+</body></html>
