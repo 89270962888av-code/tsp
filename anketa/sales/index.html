@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Профиль менеджера СКИФ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: одна колонка-анкета, карточки-ситуации; стальная палитра под металлопрокат */
+:root{
+  --bg:#f3f5f6; --panel:#ffffff; --fg:#17212a; --muted:#5b6872; --line:#d7dde1;
+  --accent:#2f6f8f; --accent-soft:#e2eef4; --warn:#b5651d; --warn-soft:#fbeee2; --ok:#2e7d4f; --ok-soft:#e3f2e8; --on-accent:#ffffff;
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif; --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11171c; --panel:#182128; --fg:#e7edf1; --muted:#9aa8b2; --line:#2c3943;
+  --accent:#6fb3d4; --accent-soft:#1d3442; --warn:#e3a066; --warn-soft:#3a2a1c; --ok:#7cc89a; --ok-soft:#1c3326; --on-accent:#0d1418; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11171c; --panel:#182128; --fg:#e7edf1; --muted:#9aa8b2; --line:#2c3943;
+  --accent:#6fb3d4; --accent-soft:#1d3442; --warn:#e3a066; --warn-soft:#3a2a1c; --ok:#7cc89a; --ok-soft:#1c3326; --on-accent:#0d1418; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:20px}
+h1{font:700 clamp(22px,4.5vw,30px)/1.15 var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font:500 17px/1.3 var(--f-display);margin:0 0 4px;text-wrap:balance}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:14px;min-width:0}
+.intro{display:grid;gap:10px}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--accent-soft)}
+label.f{display:grid;gap:6px;font-weight:500}
+input[type=text],select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+textarea{min-height:72px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,.opt input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row2{grid-template-columns:1fr}}
+.q{display:grid;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:0}
+.q.missing .qt{color:var(--warn)}
+.qt{font-weight:500}
+.qt b{color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums;margin-right:6px}
+.opts{display:grid;gap:6px}
+.opts.row{grid-template-columns:repeat(4,1fr)}
+@media (max-width:560px){.opts.row{grid-template-columns:1fr 1fr}}
+.opt{position:relative;display:block}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:flex;align-items:center;min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.3;background:var(--bg);cursor:pointer}
+.opts.row .opt span{justify-content:center;text-align:center;font-size:13px}
+.opt input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.checks{display:grid;gap:8px}
+.check{display:flex;gap:10px;align-items:flex-start}
+.check input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.progress{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px;display:grid;gap:6px}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.ptext{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+button,.btn{font:600 15px var(--f-body);border:0;border-radius:8px;padding:12px 18px;cursor:pointer;background:var(--accent);color:var(--on-accent);text-decoration:none;display:inline-flex;align-items:center}
+.ghost{background:transparent!important;color:var(--accent)!important;border:1px solid var(--accent)!important}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.note{font-size:14px;padding:10px 12px;border-radius:8px;background:var(--accent-soft)}
+.note.ok{background:var(--ok-soft)}
+.note.warn{background:var(--warn-soft)}
+.prof{display:grid;gap:8px}
+.pr{display:grid;grid-template-columns:minmax(0,200px) 1fr 48px;gap:10px;align-items:center;font-size:14px}
+.pr .track{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.pr .track i{display:block;height:100%;background:var(--accent)}
+.pr.hl .track i{background:var(--ok)}
+.pr .v{font-variant-numeric:tabular-nums;text-align:right;color:var(--muted)}
+@media (max-width:480px){.pr{grid-template-columns:1fr 48px}.pr .track{grid-column:1/-1}}
+ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12px}
+td.n{text-align:center}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:var(--line)}
+.pill.okk{background:var(--ok-soft);color:var(--ok)}
+.pill.mid{background:var(--accent-soft);color:var(--accent)}
+.pill.hi{background:var(--warn-soft);color:var(--warn)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <div class="eyebrow">ООО «СКИФ» · анкета для отдела продаж</div>
+    <h1>Профиль менеджера СКИФ</h1>
+    <p>Мы хотим понять, в чём каждый из нас сильнее всего и чему хочет расти, чтобы распределять задачи по сильным сторонам и давать людям больше того, что у них хорошо получается.</p>
+    <div class="facts"><span class="chip">≈ 10 минут</span><span class="chip">30 вопросов с вариантами + 4 открытых</span><span class="chip">Результат видят только собственники</span></div>
+    <p class="muted">Здесь нет хороших и плохих ответов: каждый вариант — это сильная сторона, просто разная. Выбирайте то, что ближе вам на самом деле. В конце вы увидите свой профиль и одной кнопкой отправите его Анастасии.</p>
+  </header>
+
+  <div id="ownerArea" hidden></div>
+
+  <form id="form" class="wrap" novalidate>
+    <div class="progress"><div class="bar"><i id="pbar"></i></div><div class="ptext" id="ptext"></div></div>
+
+    <section class="panel">
+      <h2>О вас</h2>
+      <div class="row2">
+        <label class="f">Имя и фамилия<input type="text" id="name" autocomplete="name" placeholder="Например, Мария Иванова"></label>
+        <label class="f">Должность
+          <select id="role"><option value="">Выберите</option><option>Собственник / партнёр</option><option>Помощник руководителя</option><option selected>Менеджер по продажам</option><option>Снабжение</option><option>Логистика</option><option>Другое</option></select>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div><h2>Часть 1. Рабочие ситуации</h2><p class="muted">Выберите один вариант — что вам ближе всего.</p></div>
+      <div id="qa"></div>
+    </section>
+
+    <section class="panel">
+      <div><h2>Часть 2. Ваш ресурс</h2><p class="muted">Как обычно бывает в последний месяц.</p></div>
+      <div id="qr"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Часть 3. Задачи и рост</h2>
+      <div style="display:grid;gap:8px"><span style="font-weight:500">Какие задачи вам было бы интересно взять или вы уже делаете их хорошо?</span><div class="checks" id="tasks"></div></div>
+      <label class="f">Какая задача за последний год принесла вам больше всего удовлетворения?<textarea id="o1"></textarea></label>
+      <label class="f">Если бы вам дали неделю на улучшение одного процесса в СКИФ, что бы вы улучшили и как?<textarea id="o2"></textarea></label>
+      <label class="f">Чему вы могли бы научить коллег?<textarea id="o3"></textarea></label>
+      <label class="f">Чему вам хотелось бы научиться или какую роль попробовать?<textarea id="o4"></textarea></label>
+    </section>
+
+    <div class="actions"><button type="submit">Посмотреть мой профиль</button><span class="muted" id="formMsg" role="status"></span></div>
+  </form>
+
+  <section id="result" class="panel" hidden></section>
+</div>
+
+<script>
+(function(){
+const SCALES={K:"Контроль и надёжность",T:"Точность и учёт",O:"Организация и планирование",P:"Продажи и переговоры",L:"Люди и обучение",N:"Идеи и развитие"};
+const STR={
+ K:"Вы держите договорённости и сроки — на вас можно опереться в контроле исполнения.",
+ T:"Вы видите детали и ошибки, которые другие пропускают, — сильная сторона в учёте, документах и финансах.",
+ O:"Вы умеете превращать хаос в план — сильная сторона в координации, снабжении, логистике.",
+ P:"Вы умеете договариваться и убеждать — ваша сила в работе с клиентами и поставщиками.",
+ L:"Люди рядом с вами растут — ваша сила в обучении, поддержке и командной работе.",
+ N:"Вы видите, как сделать лучше, и не боитесь нового — ваша сила в улучшениях и запусках."};
+const Q=[
+["Коллега второй раз срывает срок по общей задаче. Что вы сделаете?", [["K", "Договорюсь о новом сроке и сам(а) проверю его выполнение"], ["L", "Помогу разобраться, что мешает, и подскажу, как сделать"], ["O", "Пересоберу план, чтобы сбой не задел остальных"], ["N", "Предложу другой способ сделать задачу быстрее"]]],
+["У вас появился свободный день без текущих дел. На что вы его потратите?", [["T", "Наведу порядок в документах, таблицах, CRM"], ["N", "Изучу новый продукт, сервис или рынок"], ["P", "Обзвоню клиентов, с которыми давно не общались"], ["L", "Запишу инструкцию для новичков"]]],
+["Что в работе радует вас больше всего?", [["O", "Когда всё идёт по плану и без сбоев"], ["P", "Когда закрыта сложная сделка"], ["L", "Когда коллега, которому я помогал(а), начал справляться сам"], ["K", "Когда договорённости выполняются без напоминаний"]]],
+["На планёрке обсуждают проблему с отгрузками. Какая роль для вас естественна?", [["T", "Задаю вопросы, пока не найдём точную причину"], ["N", "Предлагаю новое решение"], ["K", "Слежу, чтобы в конце были ответственные и сроки"], ["O", "Выстраиваю порядок действий"]]],
+["В отдел пришёл новичок. Чем вы можете помочь ему лучше всего?", [["P", "Покажу, как разговаривать с клиентами и продавать"], ["L", "Объясню, как всё устроено, и поддержу первые недели"], ["K", "Дам чек-лист и буду проверять выполнение"], ["O", "Составлю план адаптации на месяц"]]],
+["Какую похвалу вам приятнее всего услышать?", [["T", "«С тобой всегда всё точно, без ошибок»"], ["P", "«Ты умеешь договориться с кем угодно»"], ["L", "«С тобой команда работает лучше»"], ["N", "«У тебя всегда свежие идеи»"]]],
+["В сложной ситуации чего коллеги чаще всего ждут от вас?", [["O", "Решения, кто и что делает"], ["L", "Поддержки и совета"], ["P", "Чтобы я взял(а) переговоры на себя"], ["T", "Чтобы я проверил(а), всё ли учтено"]]],
+["Что вас больше всего задевает в работе?", [["T", "Беспорядок в документах и цифрах"], ["K", "Когда пообещали и не сделали"], ["O", "Когда нет плана и всё в последний момент"], ["N", "Когда годами делают одно и то же, ничего не улучшая"]]],
+["Чему вы хотели бы научиться в этом году?", [["L", "Управлять людьми и командой"], ["P", "Продавать крупным клиентам"], ["T", "Финансам и учёту"], ["N", "Запускать новые проекты"]]],
+["В компании внедряют новое правило работы с CRM. Какую часть вы бы взяли?", [["N", "Придумать, как сделать удобнее"], ["O", "Расписать правило по шагам"], ["L", "Обучить коллег"], ["K", "Проверять, все ли соблюдают"]]],
+["Вам удобнее всего работать, когда:", [["O", "Есть понятный план и сроки"], ["N", "Есть свобода выбирать, как делать"], ["P", "Есть живое общение с клиентами"], ["L", "Есть команда, за которую отвечаешь"]]],
+["У коллеги случилась ошибка в отгрузке. Ваша первая мысль:", [["T", "На каком шаге была пропущена проверка"], ["L", "Как помочь ему исправить и научиться"], ["O", "Как перестроить процесс, чтобы это не повторилось"], ["K", "Кто отвечает и как не допустить такого снова"]]],
+["С чего вы обычно начинаете рабочий день?", [["O", "Со списка задач и приоритетов"], ["K", "С проверки, что сделано по вчерашним договорённостям"], ["P", "Со звонков и сообщений клиентам"], ["N", "С того, что сейчас интереснее и важнее всего"]]],
+["Вы видите, что какой-то процесс неудобный. Что вы делаете?", [["N", "Предлагаю, как его изменить"], ["O", "Сам(а) пишу новый порядок"], ["T", "Работаю как есть, но очень аккуратно"], ["L", "Обсуждаю с коллегами, как им будет удобнее"]]],
+["Что из этого вам даётся легче, чем многим?", [["O", "Держать в голове много задач и ничего не терять"], ["P", "Найти общий язык с трудным клиентом"], ["K", "Сказать «нет» и настоять на своём"], ["L", "Объяснить сложное простыми словами"]]],
+["Какой итог года вы бы назвали лучшим для себя?", [["P", "Рекордные продажи"], ["T", "Ни одной ошибки по моим заказам и документам"], ["N", "Запущенное новое направление"], ["L", "Выросшая команда"]]],
+["Клиент говорит: «На заводе дешевле». Ваши действия:", [["P", "Покажу, что мы даём сверх цены"], ["T", "Пересчитаю и сравню комплектацию и доставку"], ["N", "Предложу комплект или решение, которого у завода нет"], ["K", "Держу цену, если иначе сделка ниже порога маржи"]]],
+["Как вы ведёте свою воронку в Битриксе?", [["K", "Каждый день все задачи и сроки проставлены"], ["T", "Все поля и документы заполнены точно"], ["O", "Планирую звонки на неделю вперёд"], ["N", "Как удобно мне, главное — результат"]]],
+["Новый менеджер не может закрыть первую сделку. Вы:", [["L", "Возьму его на встречу и покажу"], ["P", "Помогу закрыть сделку и разберу с ним"], ["O", "Дам план действий по шагам"], ["K", "Проверю его скрипт и звонки"]]],
+["Что вам ближе в продажах?", [["K", "Стабильный план и понятный контроль"], ["P", "Охота за крупными сделками"], ["L", "Работа в паре и помощь команде"], ["N", "Пробовать новые продукты и каналы"]]],
+["Какую задачу отдела, кроме продаж, вы бы взяли?", [["K", "Проверять, как менеджеры ведут CRM"], ["L", "Обучать новичков"], ["T", "Следить за оплатами и дебиторкой клиентов"], ["O", "Вести планёрки"]]],
+["Сделка сорвалась в последний момент. Ваша первая мысль:", [["T", "Где я недосмотрел(а) в расчёте или условиях"], ["P", "Как вернуть клиента"], ["O", "Что поменять в процессе"], ["L", "Обсудить с коллегами, чтобы все это учли"]]],
+["Клиент просит сложный объект: склад, ворота и фасад. Вы:", [["N", "Соберу комплексное решение и предложу что-то ещё"], ["O", "Распишу, кого и когда подключить"], ["T", "Детально посчитаю спецификацию"], ["P", "Встречусь и продам весь комплекс"]]],
+["Каким вы видите себя через год?", [["P", "Лучшим продавцом с ключевыми клиентами"], ["L", "Старшим менеджером или руководителем отдела"], ["N", "Ведущим новое направление"], ["K", "Ответственным за качество работы отдела"]]]
+];
+const R=[
+["В конце обычного рабочего дня у вас остаётся сил:",["Много, хватает на всё","Достаточно","Немного","Почти не остаётся"]],
+["Как вы обычно чувствуете себя в понедельник утром?",["С интересом к неделе","Спокойно","Нужно раскачаться","Тяжело"]],
+["Насколько ваша нагрузка сейчас соответствует вашим силам?",["Могу взять больше","В самый раз","Чуть больше комфортного","Сильно больше"]],
+["Как часто в последний месяц вы чувствовали, что делаете что-то важное?",["Почти всегда","Часто","Иногда","Редко"]],
+["Если бы завтра предложили новое интересное направление, вы бы:",["Сразу взялись","Взялись, если снять что-то другое","Подумали бы","Сейчас не готовы"]],
+["Как вы восстанавливаетесь после напряжённой недели?",["Выходных хватает полностью","В основном хватает","Хватает не всегда","Не успеваю восстановиться"]]
+];
+const TASKS=["Проводить планёрки", "Обучать новичков", "Разбирать звонки коллег", "Следить за порядком в CRM отдела", "Контролировать оплаты своих клиентов", "Вести ключевых клиентов", "Развивать новое направление (ЗОК, комплексные решения)", "Писать скрипты и инструкции", "Считать сложные спецификации", "Участвовать в тендерах"];
+const MAX={};for(const k in SCALES)MAX[k]=Q.reduce((s,q)=>s+(q[1].some(o=>o[0]===k)?1:0),0);
+const TOTAL=Q.length+R.length;
+const ans={a:{},r:{}};
+const $=s=>document.querySelector(s);
+const esc=x=>String(x??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function qHTML(g,i,text,opts,row){
+  return `<div class="q" id="q_${g}${i}"><div class="qt"><b>${i+1}.</b>${esc(text)}</div><div class="opts${row?" row":""}" role="radiogroup" aria-label="${esc(text)}">`+
+  opts.map((o,k)=>`<label class="opt"><input type="radio" name="${g}${i}" id="${g}${i}_${k}" value="${k}"><span>${esc(o)}</span></label>`).join("")+`</div></div>`;
+}
+$("#qa").innerHTML=Q.map((q,i)=>qHTML("a",i,q[0],q[1].map(o=>o[1]),false)).join("");
+$("#qr").innerHTML=R.map((q,i)=>qHTML("r",i,q[0],q[1],true)).join("");
+$("#tasks").innerHTML=TASKS.map((t,i)=>`<label class="check"><input type="checkbox" id="t${i}"><span>${esc(t)}</span></label>`).join("");
+
+const MAIL="89270962888av@gmail.com";
+const DRAFT="skif-team-draft-sales";
+const fields=()=>({name:$("#name").value.trim(),role:$("#role").value,o:[1,2,3,4].map(i=>$("#o"+i).value.trim()),tasks:TASKS.map((t,i)=>$("#t"+i).checked?i:-1).filter(i=>i>=0)});
+function saveDraft(){try{localStorage.setItem(DRAFT,JSON.stringify({ans,f:fields()}))}catch(e){}}
+function progress(){const n=Object.keys(ans.a).length+Object.keys(ans.r).length;$("#pbar").style.width=(n/TOTAL*100)+"%";$("#ptext").textContent=`Отвечено ${n} из ${TOTAL}`}
+document.addEventListener("change",e=>{const t=e.target;if(t.type==="radio"&&/^[ar]\d+$/.test(t.name)){ans[t.name[0]][+t.name.slice(1)]=+t.value;document.getElementById("q_"+t.name).classList.remove("missing");progress()}saveDraft()});
+document.addEventListener("input",e=>{if(e.target.closest("#form"))saveDraft()});
+try{const d=JSON.parse(localStorage.getItem(DRAFT)||"null");if(d){Object.assign(ans.a,d.ans.a||{});Object.assign(ans.r,d.ans.r||{});
+ for(const g of ["a","r"])for(const i in ans[g]){const el=document.getElementById(`${g}${i}_${ans[g][i]}`);if(el)el.checked=true}
+ const f=d.f||{};if(f.name)$("#name").value=f.name;if(f.role)$("#role").value=f.role;(f.o||[]).forEach((v,i)=>{if(v)$("#o"+(i+1)).value=v});(f.tasks||[]).forEach(i=>{const c=$("#t"+i);if(c)c.checked=true})}}catch(e){}
+progress();
+
+function score(a,r){
+  const cnt={};for(const k in SCALES)cnt[k]=0;
+  Q.forEach((q,i)=>{const o=q[1][a[i]];if(o)cnt[o[0]]++});
+  const s={};for(const k in SCALES)s[k]=cnt[k]/MAX[k];
+  const res=r.reduce((x,v)=>x+(3-v),0)/(R.length*3);
+  const op=(s.K+s.T+s.O)/3;
+  return {s,res,op};
+}
+function resTxt(res){return res>=0.67?["okk","Ресурс высокий: есть силы на новые задачи и рост."]:res>=0.45?["mid","Ресурс средний: новые задачи лучше давать вместо части текущих."]:["hi","Ресурс сейчас на исходе: важно сначала разгрузить, потом добавлять новое."]}
+const pct=v=>Math.round(v*100);
+function bars(s){const order=Object.keys(SCALES).sort((x,y)=>s[y]-s[x]);return `<div class="prof">`+order.map((k,i)=>`<div class="pr ${i<2?"hl":""}"><span>${SCALES[k]}</span><div class="track"><i style="width:${pct(s[k])}%"></i></div><span class="v">${pct(s[k])}%</span></div>`).join("")+`</div>`}
+function top2(s){return Object.keys(SCALES).sort((x,y)=>s[y]-s[x]).slice(0,2)}
+
+// компактное кодирование для отправки в мессенджер
+function pack(rec){return "SKIF2:"+btoa(unescape(encodeURIComponent(JSON.stringify(rec))))}
+function unpack(t){const m=String(t).replace(/\s+/g,"").match(/SKIF2:([A-Za-z0-9+/=]+)/);if(!m)return null;return JSON.parse(decodeURIComponent(escape(atob(m[1]))))}
+
+$("#form").addEventListener("submit",e=>{
+  e.preventDefault();const f=fields();let miss=null;
+  Q.forEach((q,i)=>{if(ans.a[i]==null){miss=miss||"q_a"+i;$("#q_a"+i).classList.add("missing")}});
+  R.forEach((q,i)=>{if(ans.r[i]==null){miss=miss||"q_r"+i;$("#q_r"+i).classList.add("missing")}});
+  if(!f.name){$("#formMsg").textContent="Впишите имя — так Анастасия поймёт, чей это профиль.";$("#name").focus();return}
+  if(miss){$("#formMsg").textContent="Остались вопросы без ответа — они подсвечены.";document.getElementById(miss).scrollIntoView({behavior:"smooth",block:"center"});return}
+  $("#formMsg").textContent="";
+  const rec={v:2,k:"sales",n:f.name,ro:f.role,a:Q.map((q,i)=>ans.a[i]).join(""),r:R.map((q,i)=>ans.r[i]).join(""),t:f.tasks,o:f.o.map(x=>x.slice(0,400)),at:new Date().toISOString().slice(0,10)};
+  renderResult(rec);
+});
+
+function decode(rec){return {a:rec.a.split("").map(Number),r:rec.r.split("").map(Number)}}
+function renderResult(rec){
+  const d=decode(rec),sc=score(d.a,d.r),st=resTxt(sc.res),t2=top2(sc.s);
+  const msg=`Профиль менеджера СКИФ — ${rec.n}\nСильные стороны: ${t2.map(k=>SCALES[k]).join(", ")}\n\nКод результата (не меняйте):\n${pack(rec)}`;
+  const box=$("#result");box.hidden=false;
+  box.innerHTML=`<div class="eyebrow">Ваш профиль</div><h2>${esc(rec.n)}</h2>
+  <p>Ваши ведущие сильные стороны:</p><ul class="tight">${t2.map(k=>`<li><strong>${SCALES[k]}.</strong> ${STR[k]}</li>`).join("")}</ul>
+  ${bars(sc.s)}
+  <div class="note ${st[0]==="okk"?"ok":st[0]==="hi"?"warn":""}">${st[1]}</div>
+  <div style="display:grid;gap:10px"><strong>Последний шаг: отправьте профиль Анастасии</strong>
+    <div class="actions">
+      <a class="btn" id="waBtn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Отправить в WhatsApp</a>
+      <a class="btn" id="tgBtn" href="https://t.me/share/url?url=${encodeURIComponent("Профиль команды СКИФ")}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Отправить в Telegram</a>
+      <a class="btn" href="https://mail.google.com/mail/?view=cm&fs=1&to=${MAIL}&su=${encodeURIComponent("Профиль команды СКИФ — "+rec.n)}&body=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Отправить через Gmail</a>
+      <a class="btn ghost" href="mailto:${MAIL}?subject=${encodeURIComponent("Профиль команды СКИФ — "+rec.n)}&body=${encodeURIComponent(msg)}">Другая почта</a>
+      <button type="button" class="ghost" id="copyBtn">Скопировать для Max или почты</button><span class="muted" id="copyMsg" role="status"></span>
+    </div>
+    <p class="muted" style="font-size:13px">WhatsApp и Telegram откроются с готовым сообщением — выберите Анастасию и отправьте. Для Max или если почта не открылась: нажмите «Скопировать» и вставьте сообщение Анастасии в Max или в письмо на <strong style="user-select:all">${MAIL}</strong>.</p>
+    <textarea id="copyText" readonly style="min-height:110px">${esc(msg)}</textarea>
+  </div>`;
+  $("#copyBtn").addEventListener("click",async()=>{const t=$("#copyText");try{await navigator.clipboard.writeText(t.value);$("#copyMsg").textContent="Скопировано"}catch(e){t.focus();t.select();$("#copyMsg").textContent="Текст выделен — скопируйте его"}});
+  box.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// ---------- Панель собственника (видна только владельцу страницы)
+let rows={};
+function renderOwner(){
+  const list=Object.values(rows).filter(x=>x&&typeof x.a==="string"&&x.a.length===Q.length&&typeof x.r==="string"&&x.r.length===R.length);
+  const sc=list.map(x=>{const d=decode(x);return {x,s:score(d.a,d.r)}}).sort((p,q)=>q.s.op-p.s.op);
+  $("#ownerCount").textContent=`Профилей: ${sc.length}`;
+  $("#ownerTable").innerHTML=sc.length?`<div class="tbl"><table><thead><tr><th>Сотрудник</th>${Object.keys(SCALES).map(k=>`<th>${SCALES[k]}</th>`).join("")}<th>Опер. индекс</th><th>Ресурс</th><th>Интересные задачи</th></tr></thead><tbody>`+
+   sc.map(({x,s})=>{const st=resTxt(s.res);return `<tr><td><strong>${esc(x.n)}</strong><br><span class="muted">${esc(x.ro)}</span></td>${Object.keys(SCALES).map(k=>`<td class="n">${pct(s.s[k])}%</td>`).join("")}<td class="n"><span class="pill ${s.op>=0.6?"okk":s.op>=0.45?"mid":""}">${pct(s.op)}%</span></td><td class="n"><span class="pill ${st[0]}">${pct(s.res)}%</span></td><td>${(x.t||[]).map(i=>esc(TASKS[i])).join("<br>")||"—"}</td></tr>`}).join("")+`</tbody></table></div>`
+   :`<p class="muted">Пока нет профилей. Когда сотрудники пришлют вам сообщения с кодом SKIF2, вставьте каждое в поле ниже — человек появится в таблице.</p>`;
+}
+async function initOwner(){
+  if(!(window.claude&&window.claude.use))return;
+  const user=await window.claude.use("user").catch(()=>null);if(!user)return;
+  let owner=false;try{owner=await user.isOwner()}catch(e){}if(!owner)return;
+  const db=await window.claude.use("db").catch(()=>null);if(!db)return;
+  const area=$("#ownerArea");area.hidden=false;area.className="panel";
+  area.innerHTML=`<div class="eyebrow">Видно только вам</div><h2>Сводка по команде</h2><p class="muted" id="ownerCount">Загружаю…</p>
+   <div style="display:grid;gap:8px"><textarea id="pasteBox" placeholder="Вставьте сюда сообщение сотрудника целиком (с кодом SKIF2:…)"></textarea>
+   <div class="actions"><button type="button" id="pasteBtn">Добавить профиль</button><span class="muted" id="pasteMsg" role="status"></span></div></div>
+   <div id="ownerLoad" class="note">Загружаю профили…</div><div id="ownerTable"></div>
+   <p class="muted" style="font-size:12px">Проценты — как часто человек выбирал варианты этой сильной стороны. Опер. индекс — среднее «Контроль», «Точность», «Организация»: от 60% — сильный кандидат на операционные задачи. Ресурс — запас сил: ниже 45% сначала разгружать.</p>`;
+  const timer=setTimeout(()=>{const l=$("#ownerLoad");if(l)l.textContent="Профили пока не загрузились. Проверьте соединение."},10000);
+  db.collection("profiles").onSnapshot(s=>{rows={};s.docs.forEach(d=>rows[d.id]=d.data());if(!s.metadata||!s.metadata.fromCache){clearTimeout(timer);$("#ownerLoad").hidden=true}renderOwner()},()=>{clearTimeout(timer);$("#ownerLoad").textContent="Не удалось загрузить профили.";renderOwner()});
+  $("#pasteBtn").addEventListener("click",async()=>{
+    const m=$("#pasteMsg");let o=null;try{o=unpack($("#pasteBox").value)}catch(e){}
+    if(!o||typeof o.a!=="string"||o.a.length!==Q.length){m.textContent="Не нашла код SKIF2 в тексте. Вставьте сообщение целиком.";return}
+    try{await db.doc("profiles/p"+Date.now()+Math.random().toString(36).slice(2,6)).set(o);m.textContent=`Добавлено: ${o.n}`;$("#pasteBox").value=""}catch(e){m.textContent="Не удалось сохранить. Попробуйте ещё раз."}
+  });
+}
+initOwner();
+})();
+</script>
+
+</body></html>
